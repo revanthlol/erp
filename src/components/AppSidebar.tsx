@@ -1,18 +1,18 @@
 "use client"
 
 import {
-  CalendarDays, // Changed for Attendance
+  CalendarDays,
   BookOpen,
   CreditCard,
   FileText,
   GraduationCap,
   Library,
-  Lock,
   User,
   ClipboardList,
   LogOut,
   Briefcase, 
-  Clock // New icon for Hourly
+  Clock,
+  ChevronsUpDown
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
@@ -39,14 +39,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ChevronsUpDown } from "lucide-react"
 
-// Updated Icons
 const items = [
   { title: "Personal Details", url: "/", icon: User },
   { title: "Student Wise Subjects", url: "/subjects", icon: BookOpen },
-  { title: "Attendance Details", url: "/attendance", icon: CalendarDays }, // Changed Icon
-  { title: "Hour Wise Attendance", url: "/attendance-hourly", icon: Clock }, // Changed Icon
+  { title: "Attendance Details", url: "/attendance", icon: CalendarDays },
+  { title: "Hour Wise Attendance", url: "/attendance-hourly", icon: Clock },
   { title: "Internal Mark Details", url: "/internals", icon: FileText },
   { title: "Hall Ticket", url: "/hall-ticket", icon: ClipboardList },
   { title: "Exam Mark Details", url: "/exam-marks", icon: GraduationCap },
@@ -56,27 +54,31 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { isMobile } = useSidebar() // Changed 'state' to isMobile check, Shadcn handles state via CSS classes automatically now
+  const { isMobile } = useSidebar()
   const location = useLocation()
 
   return (
     <Sidebar collapsible="icon">
-      {/* 1. Header Fix: Using SidebarMenuButton size="lg" prevents cropping when collapsed */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+            {/* LOGO SECTION FIX */}
+            <SidebarMenuButton 
+              size="lg" 
+              asChild 
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
+            >
               <Link to="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                   {/* Logo Logic */}
                    <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage src="/logo.png" alt="Loyola" />
                       <AvatarFallback>LA</AvatarFallback>
                    </Avatar>
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                {/* Text hides automatically in Shadcn Sidebar, but margins were causing offset. The !justify-center fix above handles it. */}
+                <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Loyola Academy</span>
-                  <span className="truncate text-xs">Student ERP Portal</span>
+                  <span className="truncate text-xs">Student Portal</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -95,10 +97,11 @@ export function AppSidebar() {
                     asChild 
                     tooltip={item.title} 
                     isActive={location.pathname === item.url}
+                    className="group-data-[collapsible=icon]:!justify-center"
                   >
-                    <Link to={item.url}>
+                    <Link to={item.url} className="flex items-center gap-2">
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -113,20 +116,20 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {/* Footer Fix: Ensure size="lg" for consistent icon spacing */}
+                {/* USER SECTION FIX */}
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src="/student.png" alt="User" />
                     <AvatarFallback className="rounded-lg">RG</AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-semibold">Revanth Goud</span>
                     <span className="truncate text-xs">111724013034</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
+                  <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
