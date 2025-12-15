@@ -130,7 +130,7 @@ export default function Fees() {
 
             {/* --- Tabs for Action vs History --- */}
             <Tabs defaultValue="pay" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
+                <TabsList className="w-full grid grid-cols-2 lg:w-[400px]">
                     <TabsTrigger value="pay">Make Payment</TabsTrigger>
                     <TabsTrigger value="history">History ({PAYMENT_HISTORY.length})</TabsTrigger>
                 </TabsList>

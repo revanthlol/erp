@@ -1,10 +1,11 @@
+import * as React from "react"
 import { 
     Card, 
     CardContent, 
     CardDescription, 
     CardHeader, 
     CardTitle, 
-    CardFooter 
+    CardFooter
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -15,15 +16,17 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { CalendarDays, CheckCircle2, XCircle, Info, HelpCircle } from "lucide-react";
+import { CalendarDays, Info, HelpCircle, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// --- Data Configuration ---
-const CHART_DATA = [
-    { name: 'Present', value: 61, color: '#10b981' }, // Emerald-500
-    { name: 'Absent', value: 50, color: '#ef4444' }, // Red-500
-];
+// --- Chart Imports ---
+import { Label, Pie, PieChart } from "recharts"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
 
 const RAW_LOGS = [
     { date: "12-Dec-2025", hours: ["P", "", "", "", ""] },
@@ -54,30 +57,42 @@ const RAW_LOGS = [
 
 export default function HourWiseAttendance() {
     
-    // Stats Calculations
+    // Logic Stats
     const totalWorkingDays = 24;
     const hoursPresent = 61;
     const hoursAbsent = 50;
     const percentage = Math.round((hoursPresent / (hoursPresent + hoursAbsent)) * 100);
 
+    // -- CHART CONFIG --
+    const chartData = [
+      { status: "present", hours: hoursPresent, fill: "var(--color-present)" },
+      { status: "absent", hours: hoursAbsent, fill: "var(--color-absent)" },
+    ]
+
+    const chartConfig = {
+      hours: { label: "Hours" },
+      present: {
+        label: "Present",
+        color: "#86EFAC", // <--- UPDATED GREEN
+      },
+      absent: {
+        label: "Absent",
+        color: "#FCA5A5", // <--- UPDATED RED
+      },
+    } satisfies ChartConfig
+
+    // -- Styles Helper --
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case "P":
-                return "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-800";
-            case "A":
-                return "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800";
+            case "P": return "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-800";
+            case "A": return "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800";
             case "":
-            case null:
-                // Dark mode "Grayish black" feel for empty slots
-                return "bg-slate-200 border-slate-300 text-slate-400 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-600";
-            case "OD":
-                return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300";
-            default:
-                return "bg-secondary text-secondary-foreground";
+            case null: return "bg-slate-200 border-slate-300 text-slate-400 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-600";
+            case "OD": return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300";
+            default: return "bg-secondary text-secondary-foreground";
         }
     };
 
-    // Helper for legend dots
     const LegendItem = ({ label, desc, colorClass }: { label: string, desc: string, colorClass: string }) => (
         <div className="flex items-center gap-3 text-sm">
             <span className={cn("flex items-center justify-center w-8 h-8 rounded border font-bold text-xs shadow-sm", colorClass)}>
@@ -88,11 +103,10 @@ export default function HourWiseAttendance() {
     );
 
     return (
-        // Main Grid Container (100% height minus header padding approx)
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)] animate-in fade-in-50 duration-500 min-h-[600px]">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-auto lg:h-[calc(100vh-120px)] animate-in fade-in-50 duration-500 min-h-0 lg:min-h-[600px] pb-10 lg:pb-0">
             
-            {/* LEFT COLUMN: Hourly Logs (50% Width) */}
-            <Card className="flex flex-col shadow-sm border overflow-hidden h-full relative">
+            {/* LEFT COLUMN: Table */}
+            <Card className="flex flex-col shadow-sm border overflow-hidden h-[500px] lg:h-full relative order-2 lg:order-1">
                 <CardHeader className="py-4 border-b bg-muted/40 flex-shrink-0 flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                         <CalendarDays className="w-5 h-5 text-primary" />
@@ -102,7 +116,6 @@ export default function HourWiseAttendance() {
                         </div>
                     </div>
                     
-                    {/* LEGEND POPOVER */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
@@ -126,15 +139,10 @@ export default function HourWiseAttendance() {
                                 <LegendItem label="DA" desc="Disciplinary Action" colorClass="bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 border-orange-200" />
                                 <LegendItem label="LA" desc="Late Comer" colorClass="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200" />
                             </div>
-                            <div className="bg-muted/50 p-4 border-t text-[10px] text-muted-foreground leading-relaxed text-justify">
-                                <strong>Disclaimer:</strong> Attendance details published in this website is only for the immediate information to the students and does not constitute to be a legal document.
-                            </div>
                         </PopoverContent>
                     </Popover>
-
                 </CardHeader>
                 
-                {/* Table Header (Sticky) */}
                 <div className="bg-muted/40 border-b flex font-semibold text-xs text-muted-foreground py-3 px-4 flex-shrink-0">
                      <div className="w-24 flex-shrink-0">Date</div>
                      <div className="grid grid-cols-5 gap-2 flex-1 text-center">
@@ -146,7 +154,6 @@ export default function HourWiseAttendance() {
                      </div>
                 </div>
 
-                {/* Scrollable Content */}
                 <ScrollArea className="flex-1 bg-card">
                     <div className="p-4 space-y-2">
                         {RAW_LOGS.map((log, i) => (
@@ -177,11 +184,11 @@ export default function HourWiseAttendance() {
             </Card>
 
 
-            {/* RIGHT COLUMN: Stacked View (50% Width) */}
-            <div className="flex flex-col gap-6 h-full">
+            {/* RIGHT COLUMN: Stacked View */}
+            <div className="flex flex-col gap-6 h-auto lg:h-full order-1 lg:order-2">
                 
-                {/* TOP RIGHT: Overview Stats */}
-                <Card className="flex-1 shadow-sm flex flex-col justify-between max-h-[45%]">
+                {/* Stats Summary */}
+                <Card className="flex-1 shadow-sm flex flex-col justify-between max-h-[200px]">
                     <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                             <div>
@@ -193,73 +200,90 @@ export default function HourWiseAttendance() {
                             </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm pb-2">
+                    <CardContent className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                          <div className="flex flex-col">
                              <span className="text-muted-foreground text-xs uppercase font-medium">Working Days</span>
-                             <span className="text-3xl font-bold tracking-tight">{totalWorkingDays}</span>
+                             <span className="text-2xl font-bold tracking-tight">{totalWorkingDays}</span>
                          </div>
-                         <div className="flex flex-col">
+                         <div className="flex flex-col text-right lg:text-left">
                              <span className="text-muted-foreground text-xs uppercase font-medium">Status</span>
-                             <span className={`text-xl font-bold ${percentage < 75 ? "text-red-500" : "text-green-500"}`}>
-                                 {percentage < 75 ? "Poor" : "Good"}
+                             <span className={cn("text-2xl font-bold tracking-tight", percentage < 75 ? "text-red-500" : "text-green-500")}>
+                                 {percentage < 75 ? "Verge of Detention" : "Safe"}
                              </span>
-                         </div>
-                         
-                         <Separator className="col-span-2 opacity-50"/>
-
-                         <div className="flex justify-between items-center border p-2 rounded bg-muted/20">
-                             <span className="flex items-center gap-2 text-muted-foreground">
-                                 <CheckCircle2 className="w-4 h-4 text-green-500" /> Present
-                             </span>
-                             <span className="font-mono font-bold">{hoursPresent}</span>
-                         </div>
-                         <div className="flex justify-between items-center border p-2 rounded bg-muted/20">
-                             <span className="flex items-center gap-2 text-muted-foreground">
-                                 <XCircle className="w-4 h-4 text-red-500" /> Absent
-                             </span>
-                             <span className="font-mono font-bold">{hoursAbsent}</span>
                          </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/30 py-3 text-xs text-muted-foreground justify-center">
-                        <p>Includes CL, ML, OD, DA, and LA</p>
-                    </CardFooter>
                 </Card>
 
-                {/* BOTTOM RIGHT: Pie Chart */}
-                <Card className="flex-1 flex flex-col shadow-sm min-h-0">
-                    <CardHeader className="pb-0 pt-4">
-                         <CardTitle className="text-center text-sm font-medium uppercase text-muted-foreground tracking-wider">Attendance Distribution</CardTitle>
+                {/* THE DONUT CHART */}
+                <Card className="flex-1 flex flex-col shadow-sm min-h-0 h-[300px] lg:h-auto">
+                    <CardHeader className="items-center pb-0">
+                        <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Attendance Distribution</CardTitle>
+                        <CardDescription>Academic Year 2025-2026</CardDescription>
                     </CardHeader>
-                    <div className="flex-1 relative w-full min-h-0 p-2">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={CHART_DATA}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={90}
-                                    paddingAngle={2}
-                                    dataKey="value"
-                                    startAngle={90}
-                                    endAngle={-270}
-                                >
-                                    {CHART_DATA.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
-                                    ))}
-                                </Pie>
-                                <Tooltip 
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', backgroundColor: 'rgba(25, 25, 35, 0.9)', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }} 
-                                />
-                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        {/* Centered Percentage */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[60%] pointer-events-none text-center">
-                            <div className="text-4xl font-extrabold text-foreground tracking-tighter">{percentage}%</div>
+                    <CardContent className="flex-1 pb-0">
+                        <ChartContainer
+                          config={chartConfig}
+                          className="mx-auto aspect-square h-[220px]"
+                        >
+                          <PieChart>
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent hideLabel />}
+                            />
+                            <Pie
+                              data={chartData}
+                              dataKey="hours"
+                              nameKey="status"
+                              innerRadius={60}
+                              strokeWidth={5}
+                            >
+                              <Label
+                                content={({ viewBox }) => {
+                                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                    return (
+                                      <text
+                                        x={viewBox.cx}
+                                        y={viewBox.cy}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                      >
+                                        <tspan
+                                          x={viewBox.cx}
+                                          y={viewBox.cy}
+                                          className="fill-foreground text-3xl font-bold"
+                                        >
+                                          {percentage}%
+                                        </tspan>
+                                        <tspan
+                                          x={viewBox.cx}
+                                          y={(viewBox.cy || 0) + 24}
+                                          className="fill-muted-foreground text-xs font-semibold uppercase"
+                                        >
+                                          Attendance
+                                        </tspan>
+                                      </text>
+                                    )
+                                  }
+                                }}
+                              />
+                            </Pie>
+                          </PieChart>
+                        </ChartContainer>
+                    </CardContent>
+                    <CardFooter className="flex-col gap-2 text-sm pt-4">
+                        <div className="flex w-full items-center justify-center gap-4 text-xs font-medium">
+                            <div className="flex items-center gap-1.5">
+                                {/* Manually applying the new green color to legend dot */}
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#86EFAC]" />
+                                <span>Present ({hoursPresent}h)</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                {/* Manually applying the new red color to legend dot */}
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#FCA5A5]" />
+                                <span>Absent ({hoursAbsent}h)</span>
+                            </div>
                         </div>
-                    </div>
+                    </CardFooter>
                 </Card>
 
             </div>
