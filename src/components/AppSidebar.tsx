@@ -14,7 +14,7 @@ import {
   Clock,
   ChevronsUpDown
 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import {
   Sidebar,
@@ -56,6 +56,13 @@ const items = [
 export function AppSidebar() {
   const { isMobile } = useSidebar()
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem("erp-auth");
+    navigate("/login");
+  };
+
 
   return (
     <Sidebar collapsible="icon">
@@ -138,10 +145,13 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem className="text-destructive focus:bg-destructive/10 cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
+                <DropdownMenuItem 
+    className="text-destructive focus:bg-destructive/10 cursor-pointer"
+    onClick={handleLogout} // Attach the handler
+>
+    <LogOut className="mr-2 h-4 w-4" />
+    <span>Sign out</span>
+</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
