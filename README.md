@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# Loyola Student Portal (ERP Modernization)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Next-Gen College ERP dashboard that reimagines the legacy student portal experience. Built with a focus on modern UI/UX, mobile responsiveness, and visual data analytics.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   **Modern Dashboard UI**: A complete overhaul of the legacy interface using a strict **Neutral/Zinc** theme and Dark Mode by default.
+-   **Visual Analytics**: 
+    -   **Attendance**: Interactive Donut charts (Recharts) replacing static tables.
+    -   **Performance**: Automatic **SGPA Calculator** for semester marks.
+    -   **Finance**: Dashboard for Paid/Due fees with visual progress bars.
+-   **Student Services Hub**: Unified portal for exam registrations, hall ticket downloads (with mock PDF generation), and library OPAC search.
+-   **Mobile First**: Fully responsive layout with stacking cards, scrollable data tables, and a touch-friendly sidebar.
+-   **PWA Support**: Installable on iOS/Android as a standalone native-like app.
+-   **Smooth Animations**: System-wide page transitions using Framer Motion.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+-   **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives)
+-   **Charts**: [Recharts](https://recharts.org/)
+-   **Animations**: [Framer Motion](https://www.framer.com/motion/)
+-   **Routing**: React Router Dom v6
+-   **PWA**: Vite Plugin PWA
 
-## Expanding the ESLint configuration
+## 📸 Modules
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  **Student Profile**: Edit contact details, change password (Simulated), and view academic bio.
+2.  **Attendance**:
+    -   *Subject-wise*: Safe/Detained alerts based on 75% criteria.
+    -   *Hour-wise*: Detailed log view with Donut chart visualization.
+3.  **Examination**:
+    -   *Internals*: Accordion view for detailed component weighting.
+    -   *External Marks*: Grade & SGPA calculation engine.
+    -   *Hall Ticket*: Release status indicator and preview modal.
+4.  **Finance**: Payment gateway simulation and receipt history.
+5.  **Library**: Digital resource links (IEEE, DELNET) and overdue book alerts.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🏃‍♂️ Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+-   Node.js (v18 or higher)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/revanthlol/erp.git
+    cd erp
+    ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+
+4.  Open `http://localhost:5173` in your browser.
+
+## 🔐 Authentication (Mock)
+
+Since this is a frontend-only showcase:
+-   **Username**: Any value (e.g., `111724013034`)
+-   **Password**: Any value (e.g., `password`)
+
+## 📱 Mobile & PWA
+
+To test the mobile install feature:
+1.  Deploy to Vercel/Netlify (Requires HTTPS).
+2.  Open the site on a mobile device.
+3.  Use **"Add to Home Screen"** to install as a standalone app.
+
+## 📄 License
+
+This project is for educational and UI prototyping purposes.
