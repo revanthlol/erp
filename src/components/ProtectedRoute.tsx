@@ -4,7 +4,7 @@ export default function ProtectedRoute() {
   const isAuthenticated = localStorage.getItem("erp-auth") === "true";
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
