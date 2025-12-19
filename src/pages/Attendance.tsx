@@ -20,25 +20,26 @@ import {
     TrendingUp 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 // --- Data ---
 const subjectData = [
-    { code: "BS20404", name: "MICROPROCESSORS AND MICROCONTROLLERS", total: 15, present: 9, absent: 6, pct: 60.00 },
-    { code: "BS23401", name: "PROBABILITY AND STATISTICS", total: 19, present: 10, absent: 9, pct: 52.63 },
-    { code: "BS23406", name: "DATABASE MANAGEMENT SYSTEM", total: 12, present: 7, absent: 5, pct: 58.33 },
-    { code: "BS23409", name: "DATABASE MANAGEMENT SYSTEMS [PR]", total: 8, present: 2, absent: 6, pct: 25.00 },
-    { code: "CS18407", name: "MICROPROCESSORS SYSTEMS AND APPS [PR]", total: 4, present: 2, absent: 2, pct: 50.00 },
-    { code: "CS18408", name: "OBJECT ORIENTED SYSTEMS DEV [PR]", total: 8, present: 4, absent: 4, pct: 50.00 },
-    { code: "CS20405", name: "OBJECT ORIENTED SYSTEMS DEVELOPMENT", total: 16, present: 10, absent: 6, pct: 62.50 },
-    { code: "CS23402", name: "COMPUTER ORGANIZATION", total: 11, present: 6, absent: 5, pct: 54.55 },
-    { code: "CS23403", name: "WEB TECHNOLOGIES", total: 10, present: 5, absent: 5, pct: 50.00 },
-    { code: "CS23410", name: "WEB TECHNOLOGIES [PR]", total: 8, present: 6, absent: 2, pct: 75.00 },
+  { code: "BS20404", name: "MICROPROCESSORS AND MICROCONTROLLERS", total: 20, present: 17, absent: 3, pct: 85.0 },
+  { code: "BS23401", name: "PROBABILITY AND STATISTICS", total: 22, present: 18, absent: 4, pct: 81.8 },
+  { code: "BS23406", name: "DATABASE MANAGEMENT SYSTEM", total: 18, present: 15, absent: 3, pct: 83.3 },
+  { code: "BS23409", name: "DATABASE MANAGEMENT SYSTEMS [PR]", total: 10, present: 8, absent: 2, pct: 80.0 },
+  { code: "CS18407", name: "MICROPROCESSORS SYSTEMS AND APPS [PR]", total: 8, present: 6, absent: 2, pct: 75.0 },
+  { code: "CS18408", name: "OBJECT ORIENTED SYSTEMS DEV [PR]", total: 10, present: 8, absent: 2, pct: 80.0 },
+  { code: "CS20405", name: "OBJECT ORIENTED SYSTEMS DEVELOPMENT", total: 20, present: 17, absent: 3, pct: 85.0 },
+  { code: "CS23402", name: "COMPUTER ORGANIZATION", total: 16, present: 12, absent: 4, pct: 75.0 },
+  { code: "CS23403", name: "WEB TECHNOLOGIES", total: 18, present: 15, absent: 3, pct: 83.3 },
+  { code: "CS23410", name: "WEB TECHNOLOGIES [PR]", total: 10, present: 9, absent: 1, pct: 90.0 },
 ];
 
 const cumulativeData = [
-    { month: "Nov-2025", present: 49, absent: 18, odP: 0, odA: 0, med: 0, cas: 0 },
-    { month: "Dec-2025", present: 12, absent: 32, odP: 0, odA: 0, med: 0, cas: 0 },
+  { month: "Nov-2025", present: 66, absent: 14, odP: 1, odA: 0, med: 0, cas: 0 },
+  { month: "Dec-2025", present: 59, absent: 13, odP: 0, odA: 0, med: 0, cas: 0 },
 ];
+
+
 
 // --- Calculations ---
 const calculateStatus = (pct: number) => {
@@ -53,10 +54,11 @@ const getClassesToRecover = (total: number, present: number) => {
 };
 
 export default function Attendance() {
-    const grandTotal = 111;
-    const grandPresent = 61;
-    const grandAbsent = 50;
-    const grandPct = 54.95;
+const grandTotal = 152;
+const grandPresent = 125;
+const grandAbsent = 27;
+const grandPct = 82.24;
+
 
     return (
         <div className="space-y-8 animate-in fade-in-50 duration-500">
@@ -223,8 +225,8 @@ export default function Attendance() {
                             ))}
                              <TableRow className="bg-muted/50 font-bold border-t-2">
                                 <TableCell>Total</TableCell>
-                                <TableCell className="text-center text-green-700">{61}</TableCell>
-                                <TableCell className="text-center text-red-700">{50}</TableCell>
+                                <TableCell className="text-center text-green-700">{125}</TableCell>
+                                <TableCell className="text-center text-red-700">{27}</TableCell>
                              </TableRow>
                         </TableBody>
                     </Table>

@@ -19,27 +19,27 @@ import { Label } from "@/components/ui/label";
 import { RefreshCw, Settings, Save, Lock, Mail, Phone, MapPin } from "lucide-react";
 
 export default function StudentProfile() {
-  const [student, setStudent] = useState({
-    name: "GUDLA REVANTH ROSHAN GOUD",
-    regNo: "111724013034",
-    course: "B.Sc.-Computer Science and Engineering [U.G.]",
-    sem: "2025-2026 / III SEMESTER / A",
-    institution: "LOYOLA ACADEMY DEGREE & PG COLLEGE",
-    dob: "29-May-2007",
-    gender: "Male",
-    aadhaar: "997243834263",
-    father: "GUDLA SRINIVAS GOUD / GUDLA ARUN JYOTHI GOUD",
-    address: "7 8 82 GOUTHAM NAGAR MEDCHAL MALKAJGIRI HYDERABAD-500011",
-    contact: "8686866463",
-    email: "personallyrevanth@gmail.com",
-    parentContact: "8686866463 / arunjyothigoud8@gmail.com",
-    admitted: "08-Jun-2024",
-    community: "BC - B",
-    nationality: "INDIAN / HINDU",
-    hosteller: "No",
-    income: "400000",
-    state: "HYDERABAD / TELANGANA"
-  });
+const [student, setStudent] = useState({
+  name: "ARJUN KUMAR SHARMA",
+  regNo: "112024013087",
+  course: "B.Sc. - Computer Science [U.G.]",
+  sem: "2025-2026 / III SEMESTER / B",
+  institution: "ST. XAVIER'S DEGREE & PG COLLEGE",
+  dob: "14-Feb-2006",
+  gender: "Male",
+  aadhaar: "823456789012",
+  father: "RAJESH SHARMA / ANITA SHARMA",
+  address: "H.NO 12-4-56, GREEN PARK COLONY, AMEERPET, HYDERABAD - 500038",
+  contact: "9123456789",
+  email: "arjun.sharma@example.com",
+  parentContact: "9988776655 / rajesh.sharma@example.com",
+  admitted: "20-Jul-2024",
+  community: "OC",
+  nationality: "INDIAN",
+  hosteller: "Yes",
+  income: "350000",
+  state: "HYDERABAD / TELANGANA"
+});
 
   const [editForm, setEditForm] = useState(student);
   const [loading, setLoading] = useState(false);

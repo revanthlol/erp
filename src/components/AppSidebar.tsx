@@ -133,8 +133,8 @@ export function AppSidebar() {
                     <AvatarFallback className="rounded-lg">RG</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
-                    <span className="truncate font-semibold">Revanth Goud</span>
-                    <span className="truncate text-xs">111724013034</span>
+                    <span className="truncate font-semibold">ARJUN KUMAR SHARMA</span>
+                    <span className="truncate text-xs">112024013087</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>

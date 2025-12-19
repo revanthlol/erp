@@ -29,45 +29,51 @@ import {
 } from "@/components/ui/chart"
 
 const RAW_LOGS = [
-    { date: "12-Dec-2025", hours: ["P", "", "", "", ""] },
-    { date: "11-Dec-2025", hours: ["P", "", "P", "P", "P"] },
-    { date: "10-Dec-2025", hours: ["A", "A", "", "A", "A"] },
-    { date: "09-Dec-2025", hours: ["P", "P", "P", "A", "P"] },
-    { date: "08-Dec-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "05-Dec-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "04-Dec-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "03-Dec-2025", hours: ["P", "P", "P", "A", "A"] },
-    { date: "02-Dec-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "01-Dec-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "29-Nov-2025", hours: ["", "", "A", "A", "A"] },
-    { date: "28-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "27-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "26-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "25-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "24-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "22-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "21-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "20-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "19-Nov-2025", hours: ["P", "P", "", "P", "P"] },
-    { date: "18-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
-    { date: "17-Nov-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "15-Nov-2025", hours: ["A", "A", "A", "A", "A"] },
-    { date: "14-Nov-2025", hours: ["A", "A", "A", "A", "A"] },
+  { date: "12-Dec-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "11-Dec-2025", hours: ["P", "P", "P", "P", "A"] },
+  { date: "10-Dec-2025", hours: ["P", "P", "P", "A", "A"] },
+  { date: "09-Dec-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "08-Dec-2025", hours: ["P", "P", "P", "A", "P"] },
+
+  { date: "05-Dec-2025", hours: ["P", "P", "P", "P", "A"] },
+  { date: "04-Dec-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "03-Dec-2025", hours: ["P", "P", "P", "A", "A"] },
+  { date: "02-Dec-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "01-Dec-2025", hours: ["P", "P", "P", "P", "A"] },
+
+  { date: "29-Nov-2025", hours: ["P", "P", "P", "A", "A"] },
+  { date: "28-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "27-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "26-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "25-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+
+  { date: "24-Nov-2025", hours: ["P", "P", "P", "A", "P"] },
+  { date: "22-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "21-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "20-Nov-2025", hours: ["P", "P", "P", "P", "A"] },
+  { date: "19-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+
+  { date: "18-Nov-2025", hours: ["P", "P", "P", "P", "P"] },
+  { date: "17-Nov-2025", hours: ["P", "P", "A", "A", "A"] },
+  { date: "15-Nov-2025", hours: ["P", "P", "P", "A", "A"] },
+  { date: "14-Nov-2025", hours: ["P", "P", "P", "P", "A"] },
 ];
 
 export default function HourWiseAttendance() {
     
     // Logic Stats
-    const totalWorkingDays = 24;
-    const hoursPresent = 61;
-    const hoursAbsent = 50;
-    const percentage = Math.round((hoursPresent / (hoursPresent + hoursAbsent)) * 100);
+const totalWorkingDays = 30; // realistic for Nov–Dec
+const hoursPresent = 125;
+const hoursAbsent = 27;
+const totalHours = hoursPresent + hoursAbsent;
+const percentage = Math.round((hoursPresent / totalHours) * 100); // 82%
 
     // -- CHART CONFIG --
-    const chartData = [
-      { status: "present", hours: hoursPresent, fill: "var(--color-present)" },
-      { status: "absent", hours: hoursAbsent, fill: "var(--color-absent)" },
-    ]
+const chartData = [
+  { status: "present", hours: hoursPresent, fill: "var(--color-present)" },
+  { status: "absent", hours: hoursAbsent, fill: "var(--color-absent)" },
+]
+
 
     const chartConfig = {
       hours: { label: "Hours" },

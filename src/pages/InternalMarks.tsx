@@ -27,18 +27,32 @@ const STANDARD_BREAKDOWN = [
   { label: "CBT / Case Study / Presentation", max: 5.00, code: "OTH" },
 ];
 
+const COMPONENT_SCORES: Record<string, Record<string, number>> = {
+  BS20404: { ASG: 2.5, SEM: 2.0, ATT: 3.5, MID1: 8.0, MID2: 8.5, OTH: 3.0 },
+  BS23406: { ASG: 3.0, SEM: 2.5, ATT: 3.5, MID1: 9.0, MID2: 8.5, OTH: 2.5 },
+  BS23409: { ASG: 3.0, SEM: 3.0, ATT: 4.0, MID1: 10.0, MID2: 9.0, OTH: 2.5 },
+  CS18407: { ASG: 2.0, SEM: 2.0, ATT: 3.0, MID1: 7.0, MID2: 7.0, OTH: 3.0 },
+  CS18408: { ASG: 2.5, SEM: 2.5, ATT: 3.5, MID1: 8.5, MID2: 8.0, OTH: 3.0 },
+  CS20405: { ASG: 2.0, SEM: 2.0, ATT: 3.5, MID1: 9.0, MID2: 7.5, OTH: 2.0 },
+  CS23402: { ASG: 1.5, SEM: 1.5, ATT: 3.0, MID1: 7.0, MID2: 6.0, OTH: 2.0 },
+  CS23403: { ASG: 2.0, SEM: 2.5, ATT: 3.5, MID1: 8.0, MID2: 7.5, OTH: 2.0 },
+  CS23410: { ASG: 3.0, SEM: 3.0, ATT: 4.0, MID1: 10.0, MID2: 9.0, OTH: 3.0 },
+  BS23401: { ASG: 2.0, SEM: 1.5, ATT: 3.0, MID1: 7.0, MID2: 6.5, OTH: 2.0 },
+};
+
 const SUBJECTS = [
-  { code: "BS20404", name: "MICROPROCESSORS AND MICROCONTROLLERS", obtained: 0, max: 40 },
-  { code: "BS23406", name: "DATABASE MANAGEMENT SYSTEM", obtained: 0, max: 40 },
-  { code: "BS23409", name: "DATABASE MANAGEMENT SYSTEMS [PR]", obtained: 0, max: 40 },
-  { code: "CS18407", name: "MICROPROCESSORS SYSTEMS AND APPS [PR]", obtained: 0, max: 40 },
-  { code: "CS18408", name: "OBJECT ORIENTED SYSTEMS DEV [PR]", obtained: 0, max: 40 },
-  { code: "CS20405", name: "OBJECT ORIENTED SYSTEMS DEVELOPMENT", obtained: 0, max: 40 },
-  { code: "CS23402", name: "COMPUTER ORGANIZATION", obtained: 0, max: 40 },
-  { code: "CS23403", name: "WEB TECHNOLOGIES", obtained: 0, max: 40 },
-  { code: "CS23410", name: "WEB TECHNOLOGIES [PR]", obtained: 0, max: 40 },
-  { code: "BS23401", name: "PROBABILITY AND STATISTICS", obtained: 0, max: 40 },
+  { code: "BS20404", name: "MICROPROCESSORS AND MICROCONTROLLERS", obtained: 27.5, max: 40 },
+  { code: "BS23406", name: "DATABASE MANAGEMENT SYSTEM", obtained: 29.0, max: 40 },
+  { code: "BS23409", name: "DATABASE MANAGEMENT SYSTEMS [PR]", obtained: 31.5, max: 40 },
+  { code: "CS18407", name: "MICROPROCESSORS SYSTEMS AND APPS [PR]", obtained: 24.0, max: 40 },
+  { code: "CS18408", name: "OBJECT ORIENTED SYSTEMS DEV [PR]", obtained: 28.0, max: 40 },
+  { code: "CS20405", name: "OBJECT ORIENTED SYSTEMS DEVELOPMENT", obtained: 26.0, max: 40 },
+  { code: "CS23402", name: "COMPUTER ORGANIZATION", obtained: 21.0, max: 40 }, // slightly weak
+  { code: "CS23403", name: "WEB TECHNOLOGIES", obtained: 25.5, max: 40 },
+  { code: "CS23410", name: "WEB TECHNOLOGIES [PR]", obtained: 32.0, max: 40 },
+  { code: "BS23401", name: "PROBABILITY AND STATISTICS", obtained: 22.0, max: 40 }, // borderline-safe
 ];
+
 
 export default function InternalMarks() {
   return (
@@ -115,35 +129,45 @@ export default function InternalMarks() {
                           <ClipboardList className="w-4 h-4" />
                           <span>Component-wise Breakdown</span>
                       </div>
-                      
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {STANDARD_BREAKDOWN.map((comp) => (
-                              <div key={comp.code} className="flex items-start gap-3">
-                                   {/* Status Icon */}
-                                  <div className={`mt-0.5 h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold border ${comp.code.includes('MID') ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800' : 'bg-muted border-input'}`}>
-                                      {comp.code}
-                                  </div>
-                                  
-                                  <div className="flex-1 space-y-1.5">
-                                      <div className="flex justify-between items-center">
-                                          <span className="text-sm font-medium">{comp.label}</span>
-                                          <span className="text-xs font-mono font-medium text-muted-foreground">
-                                              0.00 / {comp.max.toFixed(2)}
-                                          </span>
-                                      </div>
-                                      
-                                      {/* Visual Weightage */}
-                                      <div className="relative pt-1">
-                                          <Progress 
-                                            value={0} // obtained (currently 0)
-                                            max={comp.max} 
-                                            className="h-1.5 bg-muted" 
-                                          />
-                                      </div>
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
+  {STANDARD_BREAKDOWN.map((comp) => {
+    const score = COMPONENT_SCORES[subject.code]?.[comp.code] ?? 0;
+
+    return (
+      <div key={comp.code} className="flex items-start gap-3">
+        {/* Status Icon */}
+        <div
+          className={`mt-0.5 h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold border ${
+            comp.code.includes("MID")
+              ? "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800"
+              : "bg-muted border-input"
+          }`}
+        >
+          {comp.code}
+        </div>
+
+        <div className="flex-1 space-y-1.5">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">{comp.label}</span>
+            <span className="text-xs font-mono font-medium text-muted-foreground">
+              {score.toFixed(2)} / {comp.max.toFixed(2)}
+            </span>
+          </div>
+
+          {/* Visual Weightage */}
+          <div className="relative pt-1">
+            <Progress
+              value={score}
+              max={comp.max}
+              className="h-1.5 bg-muted"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
 
                       {/* Updated Target / Footer Section */}
                       <div className="mt-6 flex items-center justify-between p-3 rounded bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900">
