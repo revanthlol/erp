@@ -90,7 +90,16 @@ export const authApi = {
     
     // Redirect logic: window.location is safer for clearing global app state than react-router here
     window.location.href = '/login';
+  },
+  getProxyImageUrl: (originalUrl?: string) => {
+      if (!originalUrl) return undefined;
+      const token = localStorage.getItem('auth_token');
+      if (!token) return originalUrl;
+      
+      // Clean duplicate /api if present (just in case) or simple concat
+      const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+      
+      return `${baseUrl}/proxy/image?token=${token}&url=${encodeURIComponent(originalUrl)}`;
   }
 };
-
 export default api;

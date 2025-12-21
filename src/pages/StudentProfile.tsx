@@ -228,12 +228,10 @@ export default function StudentProfile() {
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex justify-center items-center relative">
                  <Avatar className="w-48 h-48 border-4 border-white shadow-xl">
                 {/* Dynamically construct Proxy URL */}
-                <AvatarImage 
-                    src={student && student.photoUrl ? getSecurePhotoUrl(student.photoUrl) : ""} 
-                /> 
-                <AvatarFallback className="text-4xl">
-                    {student ? student.name.charAt(0) : "ST"}
-                </AvatarFallback>
+                 <AvatarImage 
+                        src={student ? authApi.getProxyImageUrl(student.photoUrl) : ""} 
+                    /> 
+                    <AvatarFallback className="text-4xl">ST</AvatarFallback>
                 </Avatar>
                 <div className="absolute top-4 right-4 sm:hidden">
                     <Sheet>
