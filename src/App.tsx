@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import ProtectedRoute from "@/components/ProtectedRoute"; 
+import { Toaster } from "@/components/ui/sonner";
 
 // Pages
 import Login from "@/pages/Login"; 
@@ -48,7 +49,6 @@ function AnimatedRoutes() {
                 <Route path="fees" element={<PageTransition><Fees /></PageTransition>} />
                 <Route path="library" element={<PageTransition><Library /></PageTransition>} />
                 
-                {/* Redirect any unknown route inside dashboard to home */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
         </Route>
@@ -67,6 +67,7 @@ export default function App() {
       <Router>
            <AnimatedRoutes />
       </Router>
+      <Toaster />
     </ThemeProvider>
   );
 }
