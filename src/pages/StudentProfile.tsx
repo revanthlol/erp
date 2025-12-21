@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -16,42 +16,71 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RefreshCw, Settings, Save, Lock, Mail, Phone, MapPin } from "lucide-react";
+import { RefreshCw, Settings, Save, Lock, Mail, Phone, MapPin, Loader2 } from "lucide-react";
+import { authApi } from "@/lib/api";
 
 export default function StudentProfile() {
-const [student, setStudent] = useState({
-  name: "ARJUN KUMAR SHARMA",
-  regNo: "112024013087",
-  course: "B.Sc. - Computer Science [U.G.]",
-  sem: "2025-2026 / III SEMESTER / B",
-  institution: "ST. XAVIER'S DEGREE & PG COLLEGE",
-  dob: "14-Feb-2006",
-  gender: "Male",
-  aadhaar: "823456789012",
-  father: "RAJESH SHARMA / ANITA SHARMA",
-  address: "H.NO 12-4-56, GREEN PARK COLONY, AMEERPET, HYDERABAD - 500038",
-  contact: "9123456789",
-  email: "arjun.sharma@example.com",
-  parentContact: "9988776655 / rajesh.sharma@example.com",
-  admitted: "20-Jul-2024",
-  community: "OC",
-  nationality: "INDIAN",
-  hosteller: "Yes",
-  income: "350000",
-  state: "HYDERABAD / TELANGANA"
-});
+  const [student, setStudent] = useState<any>(null); // Initialize null
+  const [isLoading, setIsLoading] = useState(true);  // Initial Fetch Loading
+  const [error, setError] = useState("");
 
-  const [editForm, setEditForm] = useState(student);
-  const [loading, setLoading] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
+  const [saving, setSaving] = useState(false);
+
+    // Helper to build the secure proxy URL
+  const getSecurePhotoUrl = (originalUrl: string) => {
+      if (!originalUrl) return "../public/logo.png"; // Fallback
+      
+      const token = localStorage.getItem("auth_token");
+      if (!token) return originalUrl; // Fallback to raw (unlikely to work but defensive)
+
+      // Point to our Backend Proxy
+      return `http://localhost:3000/api/proxy/image?token=${token}&url=${encodeURIComponent(originalUrl)}`;
+  };
+  // Fetch Data on Mount
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+          const data = await authApi.getProfile();
+          setStudent(data);
+          setEditForm(data); // Pre-fill edit form
+      } catch (err) {
+          setError("Failed to load profile. Please relogin.");
+      } finally {
+          setIsLoading(false);
+      }
+  };
 
   const handleSave = () => {
-      setLoading(true);
+      setSaving(true);
       setTimeout(() => {
           setStudent(editForm);
-          setLoading(false);
-          // Normally close sheet here, handled by wrapper trigger in real apps
+          setSaving(false);
+          // Normally close sheet here
       }, 1000);
   };
+
+  if (isLoading) {
+      return (
+          <div className="flex h-[50vh] w-full items-center justify-center gap-2 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin" /> Loading Student Profile...
+          </div>
+      );
+  }
+
+  if (error || !student) {
+      return (
+          <div className="flex h-[50vh] w-full items-center justify-center flex-col gap-4 text-destructive">
+             <p>{error}</p>
+             <Button variant="outline" onClick={() => window.location.href = '/login'}>Go to Login</Button>
+          </div>
+      );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in-50 duration-500">
@@ -94,7 +123,7 @@ const [student, setStudent] = useState({
                                 <Input 
                                     id="contact" 
                                     className="pl-9"
-                                    value={editForm.contact}
+                                    value={editForm.contact || ''}
                                     onChange={(e) => setEditForm({...editForm, contact: e.target.value})} 
                                 />
                             </div>
@@ -106,7 +135,7 @@ const [student, setStudent] = useState({
                                 <Input 
                                     id="email" 
                                     className="pl-9"
-                                    value={editForm.email}
+                                    value={editForm.email || ''}
                                     onChange={(e) => setEditForm({...editForm, email: e.target.value})}
                                 />
                             </div>
@@ -118,7 +147,7 @@ const [student, setStudent] = useState({
                                 <textarea 
                                     className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
                                     id="address"
-                                    value={editForm.address}
+                                    value={editForm.address || ''}
                                     onChange={(e) => setEditForm({...editForm, address: e.target.value})}
                                 />
                              </div>
@@ -150,8 +179,8 @@ const [student, setStudent] = useState({
                 </Tabs>
 
                 <SheetFooter className="mt-4 sm:justify-end">
-                    <Button type="submit" onClick={handleSave} disabled={loading}>
-                        {loading ? "Saving..." : <><Save className="mr-2 h-4 w-4"/> Save Changes</>}
+                    <Button type="submit" onClick={handleSave} disabled={saving}>
+                        {saving ? "Saving..." : <><Save className="mr-2 h-4 w-4"/> Save Changes</>}
                     </Button>
                 </SheetFooter>
             </SheetContent>
@@ -198,16 +227,19 @@ const [student, setStudent] = useState({
         <Card className="shadow-sm overflow-hidden border-2 border-primary/5">
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex justify-center items-center relative">
                  <Avatar className="w-48 h-48 border-4 border-white shadow-xl">
-                    <AvatarImage src="../public/logo.png" /> 
-                    <AvatarFallback className="text-4xl">RG</AvatarFallback>
+                {/* Dynamically construct Proxy URL */}
+                <AvatarImage 
+                    src={student && student.photoUrl ? getSecurePhotoUrl(student.photoUrl) : ""} 
+                /> 
+                <AvatarFallback className="text-4xl">
+                    {student ? student.name.charAt(0) : "ST"}
+                </AvatarFallback>
                 </Avatar>
                 <div className="absolute top-4 right-4 sm:hidden">
-                    {/* Mobile Setting Trigger (icon only) if screen is small */}
                     <Sheet>
                         <SheetTrigger asChild>
                            <Button size="icon" variant="ghost"><Settings className="w-5 h-5"/></Button>
                         </SheetTrigger>
-                         {/* Content repeated for structure/access logic omitted for brevity in mobile view specific adjustment */}
                     </Sheet>
                 </div>
             </div>
@@ -217,16 +249,15 @@ const [student, setStudent] = useState({
                 </Badge>
                 
                 <div className="mt-6 flex flex-col gap-3 justify-center items-center">
-                   <p className="text-xs text-muted-foreground">Last updated: Today at 10:25 PM</p>
-                   <Button variant="ghost" size="sm" className="w-full text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => window.location.reload()}>
-                      <RefreshCw className="w-3.5 h-3.5 mr-2" /> Check for updates
+                   <p className="text-xs text-muted-foreground">Synced just now</p>
+                   <Button variant="ghost" size="sm" className="w-full text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={fetchProfile}>
+                      <RefreshCw className={`w-3.5 h-3.5 mr-2 ${isLoading ? 'animate-spin' : ''}`} /> Refresh Data
                       </Button>
                 </div>
             </CardContent>
         </Card>
         
         <Card className="bg-gradient-to-br from-blue-900 to-blue-950 text-white p-6 text-center shadow-lg relative overflow-hidden">
-             {/* Abstract circle decoration */}
              <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
              
              <h3 className="font-semibold text-lg relative z-10">Wisdom & Truth</h3>

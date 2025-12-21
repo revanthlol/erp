@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
     Table,
     TableBody,
@@ -17,48 +18,78 @@ import {
     CalendarDays, 
     Clock, 
     AlertCircle, 
-    TrendingUp 
+    TrendingUp,
+    Loader2 // Only adding this for the initial loading state
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-// --- Data ---
-const subjectData = [
-  { code: "BS20404", name: "MICROPROCESSORS AND MICROCONTROLLERS", total: 20, present: 17, absent: 3, pct: 85.0 },
-  { code: "BS23401", name: "PROBABILITY AND STATISTICS", total: 22, present: 18, absent: 4, pct: 81.8 },
-  { code: "BS23406", name: "DATABASE MANAGEMENT SYSTEM", total: 18, present: 15, absent: 3, pct: 83.3 },
-  { code: "BS23409", name: "DATABASE MANAGEMENT SYSTEMS [PR]", total: 10, present: 8, absent: 2, pct: 80.0 },
-  { code: "CS18407", name: "MICROPROCESSORS SYSTEMS AND APPS [PR]", total: 8, present: 6, absent: 2, pct: 75.0 },
-  { code: "CS18408", name: "OBJECT ORIENTED SYSTEMS DEV [PR]", total: 10, present: 8, absent: 2, pct: 80.0 },
-  { code: "CS20405", name: "OBJECT ORIENTED SYSTEMS DEVELOPMENT", total: 20, present: 17, absent: 3, pct: 85.0 },
-  { code: "CS23402", name: "COMPUTER ORGANIZATION", total: 16, present: 12, absent: 4, pct: 75.0 },
-  { code: "CS23403", name: "WEB TECHNOLOGIES", total: 18, present: 15, absent: 3, pct: 83.3 },
-  { code: "CS23410", name: "WEB TECHNOLOGIES [PR]", total: 10, present: 9, absent: 1, pct: 90.0 },
-];
+import { authApi } from "@/lib/api";
 
-const cumulativeData = [
-  { month: "Nov-2025", present: 66, absent: 14, odP: 1, odA: 0, med: 0, cas: 0 },
-  { month: "Dec-2025", present: 59, absent: 13, odP: 0, odA: 0, med: 0, cas: 0 },
-];
+// Matching your backend interfaces
+interface AttendanceRecord {
+    code: string;
+    name: string;
+    total: number;
+    present: number;
+    absent: number;
+    pct: number;
+}
 
-
-
-// --- Calculations ---
-const calculateStatus = (pct: number) => {
-    if (pct >= 75) return { color: "bg-green-600", text: "text-green-600", bg: "bg-green-50 dark:bg-green-900/10", label: "Safe" };
-    if (pct >= 65) return { color: "bg-yellow-500", text: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-900/10", label: "Warning" };
-    return { color: "bg-destructive", text: "text-destructive", bg: "bg-red-50 dark:bg-red-900/10", label: "Critical" };
-};
-
-const getClassesToRecover = (total: number, present: number) => {
-    const needed = Math.ceil((0.75 * total - present) / 0.25);
-    return needed > 0 ? needed : 0;
-};
+interface AttendanceHistory {
+    month: string;
+    present: number;
+    absent: number;
+}
 
 export default function Attendance() {
-const grandTotal = 152;
-const grandPresent = 125;
-const grandAbsent = 27;
-const grandPct = 82.24;
+    // State management
+    const [subjects, setSubjects] = useState<AttendanceRecord[]>([]);
+    const [history, setHistory] = useState<AttendanceHistory[]>([]);
+    const [meta, setMeta] = useState({ total: 0, present: 0, absent: 0, pct: 0 });
+    const [isLoading, setIsLoading] = useState(true);
 
+    // Initial Fetch
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                const data: any = await authApi.getAttendance();
+                
+                // Safety checks to prevent crashes
+                setSubjects(data.subjects || []);
+                setHistory(data.history || []);
+                setMeta(data.meta || { total: 0, present: 0, absent: 0, pct: 0 });
+            } catch (err) {
+                console.error("Failed to load attendance", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+
+    // --- Calculations from your original file ---
+    const calculateStatus = (pct: number) => {
+        if (pct >= 75) return { color: "bg-green-600", text: "text-green-600", bg: "bg-green-50 dark:bg-green-900/10", label: "Safe" };
+        if (pct >= 65) return { color: "bg-yellow-500", text: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-900/10", label: "Warning" };
+        return { color: "bg-destructive", text: "text-destructive", bg: "bg-red-50 dark:bg-red-900/10", label: "Critical" };
+    };
+
+    const getClassesToRecover = (total: number, present: number) => {
+        const needed = Math.ceil((0.75 * total - present) / 0.25);
+        return needed > 0 ? needed : 0;
+    };
+
+    // --- Determine Dates for Header (Logic adapted for scraped data) ---
+    const startDate = history.length > 0 ? history[0].month : "Term Start";
+    const endDate = "Present";
+
+    if (isLoading) {
+         return (
+             <div className="flex h-[50vh] w-full items-center justify-center gap-2 text-muted-foreground animate-pulse">
+                <Loader2 className="h-6 w-6 animate-spin" /> Retrieving attendance records...
+             </div>
+         );
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in-50 duration-500">
@@ -67,30 +98,30 @@ const grandPct = 82.24;
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Attendance Details</h2>
                     <p className="text-muted-foreground mt-1">
-                        Tracking period: <span className="font-semibold text-foreground">14/Nov/2025</span> to <span className="font-semibold text-foreground">12/Dec/2025</span>
+                        Tracking period: <span className="font-semibold text-foreground">{startDate}</span> to <span className="font-semibold text-foreground">{endDate}</span>
                     </p>
                 </div>
                 
-                {grandPct < 75 && (
+                {meta.pct < 75 && meta.pct > 0 && (
                     <Alert variant="destructive" className="max-w-lg bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Attendance Shortage Warning</AlertTitle>
                         <AlertDescription>
-                            Your overall attendance is <strong>{grandPct}%</strong>. You need to attend upcoming classes to avoid detainment (75% Required).
+                            Your overall attendance is <strong>{meta.pct}%</strong>. You need to attend upcoming classes to avoid detainment (75% Required).
                         </AlertDescription>
                     </Alert>
                 )}
             </div>
 
-            {/* Metric Cards */}
+            {/* Metric Cards - RESTORED ORIGINAL LAYOUT */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                  <Card className="bg-primary text-primary-foreground shadow-lg border-none col-span-2 md:col-span-1">
                     <CardHeader className="pb-2">
                         <CardDescription className="text-primary-foreground/80 font-medium">Overall Percentage</CardDescription>
-                        <CardTitle className="text-4xl font-bold">{grandPct}%</CardTitle>
+                        <CardTitle className="text-4xl font-bold">{meta.pct.toFixed(2)}%</CardTitle>
                     </CardHeader>
                     <CardFooter className="text-xs text-primary-foreground/60">
-                        Status: {grandPct < 65 ? "Detained List" : grandPct < 75 ? "Condonation Required" : "Promoted"}
+                        Status: {meta.pct < 65 ? "Detained List" : meta.pct < 75 ? "Condonation Required" : "Promoted"}
                     </CardFooter>
                  </Card>
 
@@ -99,7 +130,7 @@ const grandPct = 82.24;
                         <CardDescription>Classes Conducted</CardDescription>
                         <CardTitle className="flex items-center gap-2 text-2xl">
                             <Clock className="w-5 h-5 text-muted-foreground" /> 
-                            {grandTotal}
+                            {meta.total}
                         </CardTitle>
                     </CardHeader>
                     <CardFooter className="text-xs text-muted-foreground">Academic hours total</CardFooter>
@@ -110,7 +141,7 @@ const grandPct = 82.24;
                         <CardDescription>Classes Present</CardDescription>
                         <CardTitle className="flex items-center gap-2 text-2xl text-green-600 dark:text-green-500">
                             <CheckCircle2 className="w-5 h-5" /> 
-                            {grandPresent}
+                            {meta.present}
                         </CardTitle>
                     </CardHeader>
                     <CardFooter className="text-xs text-muted-foreground">Total hours attended</CardFooter>
@@ -121,14 +152,14 @@ const grandPct = 82.24;
                         <CardDescription>Classes Absent</CardDescription>
                         <CardTitle className="flex items-center gap-2 text-2xl text-destructive">
                             <XCircle className="w-5 h-5" /> 
-                            {grandAbsent}
+                            {meta.absent}
                         </CardTitle>
                     </CardHeader>
-                    <CardFooter className="text-xs text-muted-foreground">~{Math.round(grandAbsent / 7)} days lost</CardFooter>
+                    <CardFooter className="text-xs text-muted-foreground">~{Math.round(meta.absent / 7)} days lost</CardFooter>
                  </Card>
             </div>
 
-            {/* Subject Table */}
+            {/* Subject Table - RESTORED ORIGINAL COLUMNS */}
             <Card className="shadow-sm border">
                 <CardHeader>
                     <CardTitle>Subject-wise Breakdown</CardTitle>
@@ -146,12 +177,12 @@ const grandPct = 82.24;
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {subjectData.map((sub) => {
+                            {subjects.map((sub, idx) => {
                                 const status = calculateStatus(sub.pct);
                                 const recover = getClassesToRecover(sub.total, sub.present);
 
                                 return (
-                                    <TableRow key={sub.code}>
+                                    <TableRow key={idx}>
                                         <TableCell className="font-mono font-medium text-xs text-muted-foreground">
                                             {sub.code}
                                         </TableCell>
@@ -181,7 +212,7 @@ const grandPct = 82.24;
                                         </TableCell>
                                         <TableCell className="text-right">
                                             {recover > 0 ? (
-                                                <Badge variant="destructive" className="whitespace-nowrap font-normal text-xs">
+                                                <Badge variant="destructive" className="whitespace-nowrap font-normal text-xs animate-pulse">
                                                     Attend next {recover}
                                                 </Badge>
                                             ) : (
@@ -216,7 +247,7 @@ const grandPct = 82.24;
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {cumulativeData.map((row) => (
+                            {history.filter(row => !row.month.includes("Total")).map((row) => (
                                 <TableRow key={row.month}>
                                     <TableCell className="font-medium">{row.month}</TableCell>
                                     <TableCell className="text-center font-bold">{row.present}</TableCell>
@@ -225,8 +256,8 @@ const grandPct = 82.24;
                             ))}
                              <TableRow className="bg-muted/50 font-bold border-t-2">
                                 <TableCell>Total</TableCell>
-                                <TableCell className="text-center text-green-700">{125}</TableCell>
-                                <TableCell className="text-center text-red-700">{27}</TableCell>
+                                <TableCell className="text-center text-green-700">{meta.present}</TableCell>
+                                <TableCell className="text-center text-red-700">{meta.absent}</TableCell>
                              </TableRow>
                         </TableBody>
                     </Table>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
   CalendarDays,
   BookOpen,
@@ -14,7 +15,7 @@ import {
   Clock,
   ChevronsUpDown
 } from "lucide-react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 import {
   Sidebar,
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { authApi } from "@/lib/api"
 
 const items = [
   { title: "Personal Details", url: "/", icon: User },
@@ -56,20 +58,46 @@ const items = [
 export function AppSidebar() {
   const { isMobile } = useSidebar()
   const location = useLocation()
-  const navigate = useNavigate()
+  
+  // Local state for sidebar profile data
+  const [profile, setProfile] = useState<{name: string, regNo: string, photoUrl: string} | null>(null);
+
+  // Fetch basics on mount
+  useEffect(() => {
+      const loadSidebarData = async () => {
+          try {
+              const data: any = await authApi.getProfile();
+              if (data) setProfile(data);
+          } catch (e) {
+              console.log("Sidebar info sync failed (Silent)");
+          }
+      };
+      loadSidebarData();
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("erp-auth");
-    navigate("/login");
+    authApi.logout(); // Uses the robust API logout clearing both keys
   };
 
+  // Helper to secure the image via proxy
+  const getSecurePhotoUrl = (originalUrl?: string) => {
+      if (!originalUrl) return undefined;
+      const token = localStorage.getItem("auth_token");
+      if (!token) return originalUrl;
+      return `http://localhost:3000/api/proxy/image?token=${token}&url=${encodeURIComponent(originalUrl)}`;
+  };
+
+  const displayName = profile?.name || "Student";
+  const displayUid = profile?.regNo || "Loading ID...";
+  // Extract initials
+  const initials = displayName.split(" ").map(n => n[0]).join("").slice(0, 2) || "ST";
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* LOGO SECTION FIX */}
+            {/* LOGO SECTION */}
             <SidebarMenuButton 
               size="lg" 
               asChild 
@@ -82,10 +110,9 @@ export function AppSidebar() {
                       <AvatarFallback>LA</AvatarFallback>
                    </Avatar>
                 </div>
-                {/* Text hides automatically in Shadcn Sidebar, but margins were causing offset. The !justify-center fix above handles it. */}
                 <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Loyola Academy</span>
-                  <span className="truncate text-xs">Student Portal</span>
+                  <span className="truncate text-xs">Student ERP Portal</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -123,18 +150,22 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {/* USER SECTION FIX */}
+                {/* USER SECTION DYNAMIC */}
                 <SidebarMenuButton
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src="/student.png" alt="User" />
-                    <AvatarFallback className="rounded-lg">RG</AvatarFallback>
+                    {/* Use secure proxy for sidebar image */}
+                    <AvatarImage 
+                        src={getSecurePhotoUrl(profile?.photoUrl)} 
+                        alt={displayName} 
+                    />
+                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
-                    <span className="truncate font-semibold">ARJUN KUMAR SHARMA</span>
-                    <span className="truncate text-xs">112024013087</span>
+                    <span className="truncate font-semibold uppercase">{displayName}</span>
+                    <span className="truncate text-xs">{displayUid}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
@@ -146,12 +177,12 @@ export function AppSidebar() {
                 sideOffset={4}
               >
                 <DropdownMenuItem 
-    className="text-destructive focus:bg-destructive/10 cursor-pointer"
-    onClick={handleLogout} // Attach the handler
->
-    <LogOut className="mr-2 h-4 w-4" />
-    <span>Sign out</span>
-</DropdownMenuItem>
+                    className="text-destructive focus:bg-destructive/10 cursor-pointer"
+                    onClick={handleLogout} 
+                >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

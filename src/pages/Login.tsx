@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { authApi } from "@/lib/api";
 
 export default function Login() {
   const [rollNo, setRollNo] = useState("");
@@ -14,23 +15,32 @@ export default function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Simulate API network delay
-    setTimeout(() => {
-      // Mock validation
-      if (rollNo && password) {
-        localStorage.setItem("erp-auth", "true");
-        // Dispatch custom event to notify App.tsx (optional, but router helps)
+    try {
+      const response = await authApi.login({ rollNo, password });
+      
+      if (response.success && response.token) {
+        // FIX 1: Set BOTH tokens.
+        // 'auth_token' is for the Backend API (new logic)
+        // 'erp-auth' is for the Frontend ProtectedRoute (existing logic)
+        localStorage.setItem("auth_token", response.token); 
+        localStorage.setItem("erp-auth", "true"); 
+
         navigate("/");
       } else {
-        setError("Invalid credentials. Please try again.");
+        setError("Invalid credentials or login failed on ERP.");
       }
-      setIsLoading(false);
-    }, 1500);
+    } catch (err: any) {
+        console.error("Login failed", err);
+        const msg = err.response?.data?.error || "Connection error. Ensure backend is running.";
+        setError(msg);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -98,7 +108,7 @@ export default function Login() {
               Reset via Email
             </span>
           </p>
-          <p>© 2025 Loyola Academy. Powered by Shadcn ERP.</p>
+          <p>© 2025 Loyola Academy. Powered by Shadcn .</p>
         </CardFooter>
       </Card>
     </div>

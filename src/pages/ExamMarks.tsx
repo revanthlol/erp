@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Table,
     TableBody,
@@ -17,78 +17,96 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Award, Calculator, TrendingUp, Calendar } from "lucide-react";
+import { Award, Calculator, TrendingUp, Calendar, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { authApi } from "@/lib/api";
 
-// Raw Data from your request
-const MARK_DATA = [
-    // Semester 1
-    { sem: "1", month: "NOV 2024", part: "I", code: "EN23101", name: "GENERAL ENGLISH - I", credit: 3, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "I", code: "VE18101", name: "VALUE EDUCATION AND PERSONALITY DEV", credit: 2, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "BS19101", name: "MATHEMATICS - I", credit: 4, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "BS19123", name: "PROBLEM SOLVING AND PROGRAMMING IN C", credit: 4, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "BS19124", name: "C PROGRAMMING [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "CS18102", name: "ELECTRONIC DEVICES AND CIRCUITS [PR]", credit: 1, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "CS22102", name: "ELECTRONIC DEVICES AND CIRCUITS", credit: 4, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "BS19121", name: "ENGINEERING PHYSICS", credit: 4, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "1", month: "NOV 2024", part: "II", code: "BS19122", name: "ENGINEERING PHYSICS [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    
-    // Semester 2
-    { sem: "2", month: "APR 2025", part: "I", code: "EN23201", name: "GENERAL ENGLISH - II", credit: 3, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "I", code: "IC23201", name: "INDIAN HERITAGE AND CULTURE", credit: 2, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS18201", name: "MATHEMATICS - II", credit: 4, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS19204", name: "C PLUS PLUS WITH DATA STRUCTURES [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS22202", name: "C PLUS PLUS WITH DATA STRUCTURES", credit: 4, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS22204", name: "LOGIC AND DIGITAL CIRCUITS", credit: 4, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS22206", name: "LOGIC AND DIGITAL CIRCUITS [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "II", code: "BS18229", name: "ENGINEERING DRAWING & WORKSHOP [PR]", credit: 3, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "2", month: "APR 2025", part: "III", code: "PL18001", name: "PLANET", credit: 1, point: 0, grade: "-", result: "PASS" }, // Point 0 handled
-
-    // Semester 3
-    { sem: "3", month: "NOV 2025", part: "I", code: "ES23301", name: "ENV. STUDIES AND GENDER SENSITIZATION", credit: 3, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "BS18330", name: "OPERATING SYSTEMS", credit: 4, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "BS18331", name: "UNIX SHELL PROGRAMMING [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "CS20302", name: "OOP THROUGH JAVA", credit: 4, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "CS20303", name: "OOP THROUGH JAVA [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "CS23301", name: "ELECTRICAL CIRCUITS AND MACHINES", credit: 4, point: 8.00, grade: "B", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "CS23349", name: "ELECTRICAL CIRCUITS AND MACHINES [PR]", credit: 1, point: 9.00, grade: "A", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "G20CSIT1P", name: "PC HARDWARE AND SOFTWARE [PR]", credit: 1, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "G20CSIT1T", name: "PC HARDWARE AND SOFTWARE", credit: 2, point: 10.00, grade: "O", result: "PASS" },
-    { sem: "3", month: "NOV 2025", part: "II", code: "BS18335", name: "DISCRETE MATHEMATICS", credit: 4, point: 7.00, grade: "C", result: "PASS" },
-];
+// Matches backend interface
+interface ExamResult {
+    sem: string;
+    month: string;
+    part: string;
+    subPart: string;
+    code: string;
+    name: string;
+    credit: number;
+    point: number;
+    grade: string;
+    result: string;
+}
 
 export default function ExamMarks() {
-    const [selectedSem, setSelectedSem] = useState("3");
+    const [allData, setAllData] = useState<ExamResult[]>([]);
+    const [selectedSem, setSelectedSem] = useState<string>("3"); // Default usually calculated
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    // Load Data
+    useEffect(() => {
+        const fetch = async () => {
+            setLoading(true);
+            try {
+                const data = await authApi.getExams();
+                if (Array.isArray(data)) {
+                    setAllData(data);
+                    // Auto-select most recent semester
+                    const sems = [...new Set(data.map((d: any) => d.sem))].sort();
+                    if(sems.length) setSelectedSem(sems[sems.length - 1]);
+                }
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load examination records.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetch();
+    }, []);
 
     // Filter logic
-    const filteredData = MARK_DATA.filter(sub => sub.sem === selectedSem);
-    const sessionName = filteredData.length > 0 ? filteredData[0].month : "";
+    const filteredData = allData.filter(sub => sub.sem === selectedSem);
+    const sessionName = filteredData.length > 0 ? filteredData[0].month : "N/A";
 
     // Stats Logic
     const totalCredits = filteredData.reduce((acc, curr) => acc + curr.credit, 0);
-    // Note: Some subjects might pass but have 0 points (like PL18001), assume they don't count towards SGPA if Point is 0 but Credit exists
-    const validGradedData = filteredData.filter(d => d.point > 0);
-    const totalPoints = validGradedData.reduce((acc, curr) => acc + (curr.point * curr.credit), 0);
+    // Ignore subjects with 0 credit or special codes if points are 0
+    const validGradedData = filteredData.filter(d => d.point >= 0 && d.grade !== '-' && d.grade !== ''); 
+    
+    // Weighted Average for SGPA: sum(credit * point) / sum(credit)
+    const weightedPoints = validGradedData.reduce((acc, curr) => acc + (curr.point * curr.credit), 0);
     const gradedCredits = validGradedData.reduce((acc, curr) => acc + curr.credit, 0);
     
-    const sgpa = gradedCredits > 0 ? (totalPoints / gradedCredits).toFixed(2) : "0.00";
+    const sgpa = gradedCredits > 0 ? (weightedPoints / gradedCredits).toFixed(2) : "0.00";
     
-    const hasBacklog = filteredData.some(d => d.result !== "PASS");
+    const hasBacklog = filteredData.some(d => d.result !== "PASS" && d.result !== "Promoted");
 
     // Badge styling
     const getGradeStyle = (grade: string) => {
-        switch(grade) {
+        switch(grade.trim().toUpperCase()) {
             case 'O': return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400";
             case 'A': return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400";
             case 'B': return "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-400";
             case 'C': return "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400";
+            case 'D': return "bg-orange-100 text-orange-700 border-orange-200";
             case 'F': return "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400";
             default: return "bg-muted text-muted-foreground";
         }
     };
 
+    if (loading) return (
+        <div className="flex h-[50vh] w-full items-center justify-center gap-2 text-muted-foreground animate-pulse">
+            <Loader2 className="h-6 w-6 animate-spin" /> Loading exam results...
+        </div>
+    );
+
+    if (error && allData.length === 0) return (
+        <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-destructive">
+            <AlertTriangle className="h-8 w-8" /> {error}
+        </div>
+    );
+
     return (
-        <div className="space-y-6 animate-in fade-in-50 duration-500">
+        <div className="space-y-6 animate-in fade-in-50 duration-500 pb-10">
             {/* Header with Control */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div>
@@ -100,9 +118,10 @@ export default function ExamMarks() {
                         <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="1">Semester I</SelectItem>
-                        <SelectItem value="2">Semester II</SelectItem>
-                        <SelectItem value="3">Semester III</SelectItem>
+                        {/* Dynamic Semesters */}
+                        {[...new Set(allData.map(d => d.sem))].sort((a,b)=>Number(a)-Number(b)).map(sem => (
+                            <SelectItem key={sem} value={sem}>Semester {sem}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -127,7 +146,7 @@ export default function ExamMarks() {
                              <Calendar className="w-4 h-4" />
                              <span className="text-xs uppercase font-semibold">Session</span>
                         </div>
-                        <span className="text-xl font-bold">{sessionName || "N/A"}</span>
+                        <span className="text-xl font-bold">{sessionName}</span>
                         <span className="text-xs text-muted-foreground">Regular & Supply</span>
                      </CardContent>
                  </Card>
@@ -142,7 +161,7 @@ export default function ExamMarks() {
                          <div className="flex items-baseline gap-1">
                             <span className="text-2xl font-bold">{totalCredits}</span>
                          </div>
-                         <p className="text-[10px] text-muted-foreground">Registered for this sem</p>
+                         <p className="text-[10px] text-muted-foreground">Registered for Semester {selectedSem}</p>
                      </CardContent>
                  </Card>
 
@@ -155,7 +174,7 @@ export default function ExamMarks() {
                          </div>
                          <div className="flex items-center gap-2">
                              <span className={`text-xl font-bold ${hasBacklog ? "text-red-600" : "text-green-600"}`}>
-                                 {hasBacklog ? "FAIL" : "PROMOTED"}
+                                 {hasBacklog ? "FAIL / ARREAR" : "PROMOTED"}
                              </span>
                          </div>
                      </CardContent>
@@ -167,35 +186,39 @@ export default function ExamMarks() {
                 <Table>
                     <TableHeader className="bg-muted/40">
                         <TableRow>
-                            <TableHead className="w-[100px]">Part</TableHead>
-                            <TableHead className="w-[120px]">Code</TableHead>
-                            <TableHead className="min-w-[250px]">Description</TableHead>
-                            <TableHead className="text-center w-[100px]">Credits</TableHead>
-                            <TableHead className="text-center w-[100px]">Points</TableHead>
-                            <TableHead className="text-center w-[100px]">Grade</TableHead>
-                            <TableHead className="text-right w-[120px]">Result</TableHead>
+                            <TableHead className="w-[80px]">Part</TableHead>
+                            <TableHead className="w-[100px] hidden sm:table-cell">Code</TableHead>
+                            <TableHead className="min-w-[200px]">Description</TableHead>
+                            <TableHead className="text-center w-[80px]">Credits</TableHead>
+                            <TableHead className="text-center w-[80px]">Points</TableHead>
+                            <TableHead className="text-center w-[80px]">Grade</TableHead>
+                            <TableHead className="text-right w-[100px]">Result</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredData.map((row) => (
-                            <TableRow key={row.code}>
+                        {filteredData.length > 0 ? filteredData.map((row, idx) => (
+                            <TableRow key={idx}>
                                 <TableCell className="font-medium text-xs text-muted-foreground">
                                     {row.part}
+                                    <span className="block text-[9px] text-muted-foreground/60">{row.subPart}</span>
                                 </TableCell>
-                                <TableCell className="font-mono text-sm font-semibold">
+                                <TableCell className="font-mono text-xs font-semibold hidden sm:table-cell">
                                     {row.code}
                                 </TableCell>
                                 <TableCell className="text-sm font-medium">
-                                    {row.name}
-                                    {row.name.includes("[PR]") && (
-                                        <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4">Lab</Badge>
-                                    )}
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
+                                        {row.name}
+                                        {row.name.toUpperCase().includes("[PR]") && (
+                                            <Badge variant="outline" className="text-[9px] py-0 h-4 border-purple-200 text-purple-700 bg-purple-50">Lab</Badge>
+                                        )}
+                                    </div>
+                                    <span className="sm:hidden text-[10px] text-muted-foreground font-mono mt-1 block">{row.code}</span>
                                 </TableCell>
-                                <TableCell className="text-center text-muted-foreground font-mono">
+                                <TableCell className="text-center text-muted-foreground font-mono text-sm">
                                     {row.credit}
                                 </TableCell>
-                                <TableCell className="text-center font-bold font-mono">
-                                    {row.point > 0 ? row.point.toFixed(2) : "-"}
+                                <TableCell className="text-center font-bold font-mono text-sm">
+                                    {row.point.toFixed(2)}
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className={cn("inline-flex items-center justify-center rounded-md text-xs font-bold w-8 h-6", getGradeStyle(row.grade))}>
@@ -206,27 +229,27 @@ export default function ExamMarks() {
                                     <Badge 
                                         variant="outline" 
                                         className={row.result === 'PASS' 
-                                            ? "text-green-600 border-green-200 bg-green-50 dark:bg-green-900/10" 
-                                            : "text-red-600 border-red-200 bg-red-50"
+                                            ? "text-green-600 border-green-200 bg-green-50 dark:bg-green-900/10 text-[10px]" 
+                                            : "text-red-600 border-red-200 bg-red-50 text-[10px]"
                                         }
                                     >
                                         {row.result}
                                     </Badge>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )) : (
+                            <TableRow>
+                                <TableCell colSpan={7} className="h-40 text-center text-muted-foreground">
+                                    Select a semester to view results
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
-                
-                {filteredData.length === 0 && (
-                    <div className="h-40 flex flex-col items-center justify-center text-muted-foreground">
-                         <p>No records found for the selected semester.</p>
-                    </div>
-                )}
             </div>
 
-            <div className="text-xs text-center text-muted-foreground pt-4">
-                <p>Disclaimer: The Grade Points shown here are derived from the web portal and are for informational purposes only.</p>
+            <div className="text-[10px] text-center text-muted-foreground pt-4 pb-4 border-t border-border/40 max-w-2xl mx-auto leading-relaxed">
+                <p>Disclaimer: The Grade Points shown here are derived from the web portal and are for informational purposes only. The official memorandum of marks issued by the institution is the final document.</p>
             </div>
         </div>
     );
