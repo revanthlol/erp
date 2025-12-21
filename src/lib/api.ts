@@ -21,13 +21,21 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // If backend returns 401 Unauthorized (Session dead, invalid token, or Server Restarted)
+    // If session is dead (401)
     if (error.response?.status === 401) {
-      // Avoid redirect loop if we are already on login
-      if (!window.location.pathname.includes('/login')) {
-        authApi.logout();
+      const isLogin = window.location.pathname.includes('/login');
+      
+      // ONLY dispatch event if we aren't already at login
+      if (!isLogin) {
+          // Fire the event for the UI to pick up
+          window.dispatchEvent(new Event("auth:session-expired"));
+          
+          // DO NOT call authApi.logout() here. 
+          // DO NOT clear localStorage here. 
+          // This keeps the user on the current page so they see the Dialog.
       }
     }
+    // Propagate error so component stops loading spinners
     return Promise.reject(error);
   }
 );
@@ -87,8 +95,6 @@ export const authApi = {
     console.warn("Logging out due to session termination...");
     localStorage.removeItem('auth_token'); // Backend Token
     localStorage.removeItem('erp-auth');   // Legacy Guard
-    
-    // Redirect logic: window.location is safer for clearing global app state than react-router here
     window.location.href = '/login';
   },
   getProxyImageUrl: (originalUrl?: string) => {

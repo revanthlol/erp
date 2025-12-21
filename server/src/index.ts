@@ -143,6 +143,11 @@ app.get('/api/proxy/image', async (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+  res.send('Server is active and running.');
+});
+
 app.listen(port, () => {
   console.log(`Backend server running on http://localhost:${port}`);
 });
+

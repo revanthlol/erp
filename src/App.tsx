@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import ProtectedRoute from "@/components/ProtectedRoute"; 
 import { Toaster } from "@/components/ui/sonner";
+import { SessionAlert } from "@/components/session-alert"; 
 
 // Pages
 import Login from "@/pages/Login"; 
@@ -66,6 +67,7 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="erp-ui-theme">
       <Router>
            <AnimatedRoutes />
+           <SessionAlert />
       </Router>
       <Toaster />
     </ThemeProvider>
