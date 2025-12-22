@@ -1,81 +1,135 @@
-# Loyola Student Portal (ERP Modernization)
 
-A Next-Gen College ERP dashboard that reimagines the legacy student portal experience. Built with a focus on modern UI/UX, mobile responsiveness, and visual data analytics.
+<div align="center">
 
-## 🚀 Features
+# A better ERP Student Portal
+### Fixing the legacy broken system
 
--   **Modern Dashboard UI**: A complete overhaul of the legacy interface using a strict **Neutral/Zinc** theme and Dark Mode by default.
--   **Visual Analytics**: 
-    -   **Attendance**: Interactive Donut charts (Recharts) replacing static tables.
-    -   **Performance**: Automatic **SGPA Calculator** for semester marks.
-    -   **Finance**: Dashboard for Paid/Due fees with visual progress bars.
--   **Student Services Hub**: Unified portal for exam registrations, hall ticket downloads (with mock PDF generation), and library OPAC search.
--   **Mobile First**: Fully responsive layout with stacking cards, scrollable data tables, and a touch-friendly sidebar.
--   **PWA Support**: Installable on iOS/Android as a standalone native-like app.
--   **Smooth Animations**: System-wide page transitions using Framer Motion.
+![Status](https://img.shields.io/badge/status-production-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-orange?style=for-the-badge)
 
-## 🛠️ Tech Stack
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite" />
+  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/Shadcn_UI-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="Shadcn" />
+</p>
 
--   **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives)
--   **Charts**: [Recharts](https://recharts.org/)
--   **Animations**: [Framer Motion](https://www.framer.com/motion/)
--   **Routing**: React Router Dom v6
--   **PWA**: Vite Plugin PWA
+</div>
 
+---
+
+## 📖 Overview
+
+This **Loyola ERP Student Portal** is a headless modernization wrapper built to interface with the legacy college management system. It acts as a secure proxy, scraping HTML data in real-time and converting it into a clean, RESTful JSON API.
+
+This project solves the frustration of outdated, non-responsive, and table-heavy university portals by providing students with a sleek, **mobile-first PWA dashboard** featuring analytics, graphs, and instant data synchronization.
+
+## 🚀 Key Features
+
+### 💎 Frontend Experience
+-   **Titanium Theme UI**: A polished professional interface using `shadcn/ui` with distinct "Titanium" light mode and true dark mode.
+-   **Visual Analytics**:
+    -   **Attendance**: Replaces static logs with interactive Donut charts and "Classes to Attend" calculators.
+    -   **Grades**: Automatic **SGPA Calculation** engine for exam results.
+-   **Session Guard**: Smart idle tracking that auto-locks the UI before the legacy server timeout occurs.
+-   **PWA Ready**: Fully installable as a native app on iOS and Android.
+
+### ⚙️ Backend Architecture
+-   **Headless Scraper**: Uses **Cheerio** & **Axios** to parse JSP pages and extract structured data.
+-   **Secure Proxying**:
+    -   **Image Tunneling**: Bypasses strict referral checks to serve authenticated student photos securely to the frontend.
+    -   **Cookie Management**: Handles complex session cookies (`JSESSIONID`) and simulates browser navigation flow.
+-   **Live Data**: Zero database. All data is fetched real-time from the college server using the user's actual credentials.
+
+---
+
+## 🏗️ Architecture
+
+```bash
+graph LR
+    User[Student] -->|HTTPS| Frontend[Vercel Frontend]
+    Frontend -->|REST API| Backend[Render Backend]
+    Backend -->|Scraping Request| Legacy[Legacy ERP (JSP/HTML)]
+    Legacy -->|HTML Response| Backend
+    Backend -->|JSON Data| Frontend
+```
 ## 📸 Modules
 
-1.  **Student Profile**: Edit contact details, change password (Simulated), and view academic bio.
-2.  **Attendance**:
-    -   *Subject-wise*: Safe/Detained alerts based on 75% criteria.
-    -   *Hour-wise*: Detailed log view with Donut chart visualization.
-3.  **Examination**:
-    -   *Internals*: Accordion view for detailed component weighting.
-    -   *External Marks*: Grade & SGPA calculation engine.
-    -   *Hall Ticket*: Release status indicator and preview modal.
-4.  **Finance**: Payment gateway simulation and receipt history.
-5.  **Library**: Digital resource links (IEEE, DELNET) and overdue book alerts.
+| Module | Functionality |
+| :--- | :--- |
+| **Authentication** | Secure proxy login ensuring credentials never leave the session loop. |
+| **Profile** | Bio-data display with **secure image proxying** to load protected photos. |
+| **Attendance** | Detailed Subject-wise and Hour-wise logging with "Safe Zone" indicators. |
+| **Internals** | Accordion-style breakdown of mid-exams and assignment scoring. |
+| **Results** | Historical semester results with weighted grade point average calculation. |
+| **Sidebar** | Global navigation with dynamic student details fetching. |
 
-## 🏃‍♂️ Getting Started
+---
 
-### Prerequisites
--   Node.js (v18 or higher)
+## 🏃‍♂️ Local Development
 
-### Installation
+The project is a Monorepo containing both Client and Server.
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/revanthlol/erp.git
-    cd erp
-    ```
+### 1. Prerequisites
+-   Node.js (v18+)
+-   Git
 
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
+### 2. Setup Backend (The Scraper)
+```bash
+cd server
+npm install
+# Create .env file
+echo "PORT=3000
+ERP_BASE_URL=http://202.160.160.58:8080/lastudentportal
+FRONTEND_URL=http://localhost:5173" > .env
 
-3.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
+# Run Server
+node server/dist/index.js
+```
+> Backend runs on `http://localhost:3000`
 
-4.  Open `http://localhost:5173` in your browser.
+### 3. Setup Frontend (The Dashboard)
+Open a new terminal in the root directory:
+```bash
+npm install
+# Create .env.local file
+echo "VITE_API_URL=http://localhost:3000/api" > .env.local
 
-## 🔐 Authentication (Mock)
+# Run Client
+npm run dev
+```
+> Frontend runs on `http://localhost:5173`
 
-Since this is a frontend-only showcase:
--   **Username**: Any value (e.g., `111724013034`)
--   **Password**: Any value (e.g., `password`)
+---
 
-## 📱 Mobile & PWA
+## ☁️ Deployment Strategy
 
-To test the mobile install feature:
-1.  Deploy to Vercel/Netlify (Requires HTTPS).
-2.  Open the site on a mobile device.
-3.  Use **"Add to Home Screen"** to install as a standalone app.
+This project uses a split-deployment strategy to stay within free-tier limits:
 
-## 📄 License
+### **Frontend (Vercel)**
+-   Hosting the React SPA.
+-   Configured via `vercel.json` for SPA routing.
+-   **Env Var**: `VITE_API_URL` points to the Render Backend.
 
-This project is for educational and UI prototyping purposes.
+### **Backend (Render)**
+-   Hosting the Node.js Scraper API.
+-   **Problem**: Free instance sleeps after 15 mins.
+-   **Solution**: Integrated **Keep-Alive Cron Job** that pings the server health endpoint every 10 minutes to prevent cold starts.
+
+---
+
+## 📄 Disclaimer
+
+This project is an **unofficial client** developed for educational purposes and to improve the user experience for students.
+-   It **does not** store any passwords or academic data.
+-   It acts strictly as a passthrough interface.
+-   This project is not affiliated with the university or Firstline Infotech.
+
+---
+
+<div align="center">
+  <p>Any helpful contributions to the project are accepted ❤️</p>
+</div>
