@@ -79,7 +79,7 @@ export default function Login() {
                   <strong>Let’s face it ,</strong>The official college ERP is far beyond usable with an UI/UX standpoint. This project aims to provide a cleaner, faster, and more user-friendly interface for accessing your student data.
                 </p>
                 <p>
-                  This is interface is built to save your sanity. It cleans up the data, visualizes your grades, and make things look like they belong in this decade.
+                  This interface is built to save your sanity. It cleans up the data, visualizes your grades, and make things look like they belong in this decade.
                 </p>
                 <p className="text-xs text-muted-foreground italic border-l-2 pl-3">
                   Note: The site simply present the data through HTML parsing. No records are altered, and your session details stay strictly between you and you college's ERP backend secure proxy.
