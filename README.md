@@ -46,16 +46,72 @@ This project solves the frustration of outdated, non-responsive, and table-heavy
 
 ---
 
-## 🏗️ Architecture
-
-```bash
-graph LR
-    User[Student] -->|HTTPS| Frontend[Vercel Frontend]
-    Frontend -->|REST API| Backend[Render Backend]
-    Backend -->|Scraping Request| Legacy[Legacy ERP (JSP/HTML)]
-    Legacy -->|HTML Response| Backend
-    Backend -->|JSON Data| Frontend
+  ## 🏗️ Architecture
+<div >
+  <p>
+    
+```text
++---------------------+
+|      Student        |
+|       (User)        |
++----------+----------+
+           |
+           |  HTTPS
+           v
++----------+-----------------------------------+
+|              Frontend (Client)               |
+|----------------------------------------------|
+|  React + shadcn/ui                           |
+|  Hosted on Vercel                            |
+|                                              |
+|  - UI renders student data                   |
+|  - Sends authenticated API requests          |
++----------------------+-----------------------+
+                       |
+                       |  REST API (JSON)
+                       v
++----------------------+-----------------------+
+|               Backend (Server)               |
+|----------------------------------------------|
+|  Node.js API + Scraper                       |
+|  Hosted on Render                            |
+|                                              |
+|  - Manages sessions                          |
+|  - Detects ERP timeout                       |
+|  - Scrapes legacy HTML pages                 |
+|  - Normalizes data into JSON                 |
++----------------------+-----------------------+
+                       |
+                       |  Authenticated
+                       |  Scraping Requests
+                       v
++----------------------+-----------------------+
+|            College ERP System                |
+|----------------------------------------------|
+|  Legacy JSP / HTML                           |
+|                                              |
+|  - Cookie-based authentication               |
+|  - Session timeout on inactivity             |
+|  - Returns raw HTML pages                    |
++----------------------+-----------------------+
+                       ^
+                       |  HTML Responses
+                       | 
+                       |
++----------------------+-----------------------+
+Flow Summary:
+-------------
+1. Student accesses the frontend via HTTPS.
+2. Frontend requests data from the backend using REST (JSON).
+3. Backend performs authenticated scraping against the ERP.
+4. ERP responds with HTML pages.
+5. Backend parses HTML and converts it into structured JSON.
+6. Backend sends processed JSON back to the frontend.
 ```
+</p>
+</div>
+
+
 ## 📸 Modules
 
 | Module | Functionality |
