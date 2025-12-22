@@ -143,7 +143,7 @@ ERP_BASE_URL=http://202.160.160.58:8080/lastudentportal
 FRONTEND_URL=http://localhost:5173" > .env
 
 # Run Server
-node server/dist/index.js
+node dist/index.js
 ```
 > Backend runs on `http://localhost:3000`
 
