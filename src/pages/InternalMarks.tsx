@@ -183,7 +183,7 @@ export default function InternalMarks() {
                                <span className="text-xs font-medium">Evaluation Summary</span>
                            </div>
                            <div className="flex gap-4 text-xs">
-                                <span className="text-muted-foreground">Passed: 
+                                <span className="text-muted-foreground">Pass Mark: 
                                     <span className="font-mono ml-1 font-bold text-foreground">16/40</span>
                                 </span>
                                 <span className="text-muted-foreground hidden sm:inline">Safe: 
