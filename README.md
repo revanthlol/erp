@@ -35,7 +35,7 @@ This project solves the frustration of outdated, non-responsive, and table-heavy
     -   **Attendance**: Replaces static logs with interactive Donut charts and "Classes to Attend" calculators.
     -   **Grades**: Automatic **SGPA Calculation** engine for exam results.
 -   **Session Guard**: Smart idle tracking that auto-locks the UI before the legacy server timeout occurs.
--   **PWA Ready**: Fully installable as a native app on iOS and Android.
+-   **PWA Ready**: Fully installable as a web app on iOS and Android.
 
 ###  Backend Architecture
 -   **Headless Scraper**: Uses **Cheerio** & **Axios** to parse JSP pages and extract structured data.
@@ -74,7 +74,7 @@ This project solves the frustration of outdated, non-responsive, and table-heavy
 |               Backend (Server)               |
 |----------------------------------------------|
 |  Node.js API + Scraper                       |
-|  Hosted on Render                            |
+|  Hosted on Oracle VPS                        |
 |                                              |
 |  - Manages sessions                          |
 |  - Detects ERP timeout                       |
