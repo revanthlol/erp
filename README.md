@@ -21,15 +21,15 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 This **Loyola ERP Student Portal** is a headless modernization wrapper built to interface with the legacy college management system. It acts as a secure proxy, scraping HTML data in real-time and converting it into a clean, RESTful JSON API.
 
 This project solves the frustration of outdated, non-responsive, and table-heavy university portals by providing students with a sleek, **mobile-first PWA dashboard** featuring analytics, graphs, and instant data synchronization.
 
-## 🚀 Key Features
+##  Key Features
 
-### 💎 Frontend Experience
+###  Frontend Experience
 -   **Titanium Theme UI**: A polished professional interface using `shadcn/ui` with distinct "Titanium" light mode and true dark mode.
 -   **Visual Analytics**:
     -   **Attendance**: Replaces static logs with interactive Donut charts and "Classes to Attend" calculators.
@@ -37,7 +37,7 @@ This project solves the frustration of outdated, non-responsive, and table-heavy
 -   **Session Guard**: Smart idle tracking that auto-locks the UI before the legacy server timeout occurs.
 -   **PWA Ready**: Fully installable as a native app on iOS and Android.
 
-### ⚙️ Backend Architecture
+###  Backend Architecture
 -   **Headless Scraper**: Uses **Cheerio** & **Axios** to parse JSP pages and extract structured data.
 -   **Secure Proxying**:
     -   **Image Tunneling**: Bypasses strict referral checks to serve authenticated student photos securely to the frontend.
@@ -46,7 +46,7 @@ This project solves the frustration of outdated, non-responsive, and table-heavy
 
 ---
 
-  ## 🏗️ Architecture
+  ##  Architecture
 <div >
   <p>
     
@@ -112,7 +112,7 @@ Flow Summary:
 </div>
 
 
-## 📸 Modules
+##  Modules
 
 | Module | Functionality |
 | :--- | :--- |
@@ -125,12 +125,12 @@ Flow Summary:
 
 ---
 
-## 🏃‍♂️ Local Development
+##  Local Development
 
 The project is a Monorepo containing both Client and Server.
 
 ### 1. Prerequisites
--   Node.js (v18+)
+-   Node.js (v20+)
 -   Git
 
 ### 2. Setup Backend (The Scraper)
@@ -161,7 +161,7 @@ npm run dev
 
 ---
 
-## ☁️ Deployment Strategy
+##  Deployment Strategy
 
 This project uses a split-deployment strategy to stay within free-tier limits:
 
@@ -170,14 +170,12 @@ This project uses a split-deployment strategy to stay within free-tier limits:
 -   Configured via `vercel.json` for SPA routing.
 -   **Env Var**: `VITE_API_URL` points to the Render Backend.
 
-### **Backend (Render)**
+### **Backend (Oracle VPS)**
 -   Hosting the Node.js Scraper API.
--   **Problem**: Free instance sleeps after 15 mins.
--   **Solution**: Integrated **Keep-Alive Cron Job** that pings the server health endpoint every 10 minutes to prevent cold starts.
 
 ---
 
-## 📄 Disclaimer
+##  Disclaimer
 
 This project is an **unofficial client** developed for educational purposes and to improve the user experience for students.
 -   It **does not** store any passwords or academic data.
