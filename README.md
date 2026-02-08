@@ -168,7 +168,7 @@ This project uses a split-deployment strategy to stay within free-tier limits:
 ### **Frontend (Vercel)**
 -   Hosting the React SPA.
 -   Configured via `vercel.json` for SPA routing.
--   **Env Var**: `VITE_API_URL` points to the Render Backend.
+-   **Env Var**: `VITE_API_URL` points to the Backend.
 
 ### **Backend (Oracle VPS)**
 -   Hosting the Node.js Scraper API.
