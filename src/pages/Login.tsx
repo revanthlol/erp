@@ -98,8 +98,8 @@ export default function Login() {
       {/* --- Login Card --- */}
       <Card className="w-full max-w-md shadow-xl border-primary/10 relative z-10 animate-in zoom-in-95 duration-500 bg-background/80 backdrop-blur-sm">
         <CardHeader className="text-center space-y-1">
-          <div className="mx-auto w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-xl mb-2 shadow-lg">
-            LA
+          <div className="mx-auto w-12 h-12 rounded-xl mb-2 shadow-lg overflow-hidden">
+            <img src="/logo.png" alt="Loyola Academy" className="w-full h-full object-cover" />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
