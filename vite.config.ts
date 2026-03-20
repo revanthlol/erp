@@ -9,6 +9,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'student.png'], // Ensure your images are cached
+      workbox: {
+        // Don't serve index.html for JS/CSS asset requests
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/assets\//, /^\/registerSW\.js$/],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      },
       manifest: {
         name: 'Loyola Student Portal',
         short_name: 'Loyola ERP',
