@@ -9,13 +9,31 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'student.png'], // Ensure your images are cached
-      // Temporarily unregister and remove the broken service worker + caches
-      selfDestroying: true,
       workbox: {
         // Don't serve index.html for JS/CSS asset requests
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/assets\//, /^\/registerSW\.js$/],
+        navigateFallbackDenylist: [
+          /^\/assets\//,
+          /^\/registerSW\.js$/,
+          /\/.*\.(?:js|css|map|png|jpg|jpeg|svg|webmanifest)$/
+        ],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === 'document',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'pages' }
+          },
+          {
+            urlPattern: ({ request }) =>
+              ['style', 'script', 'worker'].includes(request.destination),
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'assets' }
+          }
+        ]
       },
       manifest: {
         name: 'Loyola Student Portal',
