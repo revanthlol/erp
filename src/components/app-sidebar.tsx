@@ -29,25 +29,17 @@ export default function StudentProfile() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in-50 duration-500">
-      
-      {/* ... Left Card (General Info) stays same ... */}
-
       {/* Profile Photo Card */}
       <div className="space-y-6">
         <Card className="shadow-sm overflow-hidden border-2 border-primary/5">
           <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex justify-center items-center relative">
             <Avatar className="w-48 h-48 border-4 border-white shadow-xl">
-              
-              {/* ✅ CRITICAL FIX */}
               <AvatarImage
                 src={student ? authApi.getProxyImageUrl(student.photoUrl) : ""}
               />
-
               <AvatarFallback className="text-4xl">ST</AvatarFallback>
             </Avatar>
-            {/* ... settings trigger ... */}
           </div>
-          {/* ... Rest of card ... */}
         </Card>
       </div>
     </div>
@@ -57,6 +49,7 @@ export default function StudentProfile() {
 
 // ====================== AppSidebar ======================
 
+import { useState, useEffect } from "react"
 import {
   CalendarDays,
   BookOpen,
@@ -69,7 +62,6 @@ import {
   LogOut,
   Briefcase,
   Clock,
-  ChevronsUpDown,
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
@@ -88,12 +80,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { authApi } from "@/lib/api"
 
 const items = [
   { title: "Personal Details", url: "/", icon: User },
@@ -143,7 +131,6 @@ export function AppSidebar() {
       .join("")
       .slice(0, 2) || "ST"
 
-  // ✅ FIX: centralized proxy usage
   const avatarUrl = authApi.getProxyImageUrl(profile?.photoUrl)
 
   return (
@@ -200,45 +187,31 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+      {/* ✅ DIRECT LOGOUT (NO DROPDOWN) */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={avatarUrl} alt={displayName} />
-                    <AvatarFallback className="rounded-lg">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
-                    <span className="truncate font-semibold uppercase">
-                      {displayName}
-                    </span>
-                    <span className="truncate text-xs">{displayUid}</span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem
-                  className="text-destructive focus:bg-destructive/10 cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton
+              size="lg"
+              onClick={handleLogout}
+              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0"
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={avatarUrl} alt={displayName} />
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="grid flex-1 text-left text-sm leading-tight ml-2 group-data-[collapsible=icon]:ml-0 group-data-[collapsible=icon]:hidden">
+                <span className="truncate font-semibold uppercase">
+                  {displayName}
+                </span>
+                <span className="truncate text-xs">{displayUid}</span>
+              </div>
+
+              <LogOut className="ml-auto size-4 text-destructive group-data-[collapsible=icon]:hidden" />
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
