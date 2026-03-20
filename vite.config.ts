@@ -9,6 +9,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'student.png'], // Ensure your images are cached
+      // Temporarily unregister and remove the broken service worker + caches
+      selfDestroying: true,
       workbox: {
         // Don't serve index.html for JS/CSS asset requests
         navigateFallback: '/index.html',
