@@ -19,6 +19,11 @@ app.use(express.json());
 
 const sessionStore = new Map<string, ERPClient>();
 
+const isSessionExpiredError = (error: any) => {
+  const message = String(error?.message || error || '');
+  return message.toLowerCase().includes('session expired');
+};
+
 app.post('/api/login', async (req, res) => {
   const { rollNo, password }: LoginCredentials = req.body;
   if (!rollNo || !password) return res.status(400).json({ error: 'Missing credentials' });
@@ -47,6 +52,10 @@ app.get('/api/student/profile', async (req, res) => {
     const data = await client.getStudentProfile();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to scrape profile' });
   }
 });
@@ -60,6 +69,10 @@ app.get('/api/student/subjects', async (req, res) => {
     const data = await client.getStudentSubjects();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to scrape subjects' });
   }
 });
@@ -73,6 +86,10 @@ app.get('/api/student/attendance', async (req, res) => {
     const data = await client.getAttendance();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to scrape attendance' });
   }
 });
@@ -86,6 +103,10 @@ app.get('/api/student/attendance/hourly', async (req, res) => {
     const data = await client.getHourWiseAttendance();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to fetch hourly logs' });
   }
 });
@@ -99,6 +120,10 @@ app.get('/api/student/internals', async (req, res) => {
     const data = await client.getInternalMarks();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to scrape internals' });
   }
 });
@@ -112,6 +137,10 @@ app.get('/api/student/exams', async (req, res) => {
     const data = await client.getExamResults();
     res.json(data);
   } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
     res.status(500).json({ error: 'Failed to scrape exams' });
   }
 });
@@ -150,4 +179,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Backend server running on http://localhost:${port}`);
 });
-

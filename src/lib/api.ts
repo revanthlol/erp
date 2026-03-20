@@ -25,14 +25,15 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const isLogin = window.location.pathname.includes('/login');
       
-      // ONLY dispatch event if we aren't already at login
+      // Always clear stale session so ProtectedRoute can't keep users in a dead session
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('erp-auth');
+      sessionStorage.setItem('session_expired', '1');
+
+      // ONLY redirect if we aren't already at login
       if (!isLogin) {
-          // Fire the event for the UI to pick up
           window.dispatchEvent(new Event("auth:session-expired"));
-          
-          // DO NOT call authApi.logout() here. 
-          // DO NOT clear localStorage here. 
-          // This keeps the user on the current page so they see the Dialog.
+          window.location.href = '/login?reason=expired';
       }
     }
     // Propagate error so component stops loading spinners
