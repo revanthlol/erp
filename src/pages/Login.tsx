@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,16 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get('reason');
+    const expiredFlag = sessionStorage.getItem('session_expired');
+    if (reason === 'expired' || expiredFlag === '1') {
+      setError("Your session expired. Please sign in again.");
+      sessionStorage.removeItem('session_expired');
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
