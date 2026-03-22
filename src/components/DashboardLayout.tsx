@@ -1,9 +1,10 @@
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { LogOut, Menu } from "lucide-react"
+import { useSwipeSidebar } from "@/hooks/use-swipe-sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,8 +16,10 @@ import {
 import { useLocation, Outlet } from "react-router-dom"
 import { authApi } from "@/lib/api"
 
-export default function DashboardLayout() {
+function DashboardContent() {
   const location = useLocation()
+  const { toggleSidebar } = useSidebar()
+  useSwipeSidebar()
 
   const getPageName = () => {
     const path = location.pathname
@@ -27,11 +30,17 @@ export default function DashboardLayout() {
   const currentPath = getPageName()
 
   return (
-    <SidebarProvider>
+    <>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 sticky top-0 z-10">
-          <SidebarTrigger className="-ml-1" />
+          <button
+            onClick={toggleSidebar}
+            className="-ml-1 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="size-5" />
+          </button>
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
@@ -66,6 +75,14 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </SidebarInset>
+    </>
+  )
+}
+
+export default function DashboardLayout() {
+  return (
+    <SidebarProvider>
+      <DashboardContent />
     </SidebarProvider>
   )
 }

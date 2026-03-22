@@ -98,10 +98,10 @@ export function AppSidebar() {
                     asChild
                     tooltip={item.title}
                     isActive={location.pathname === item.url}
-                    className="group-data-[collapsible=icon]:!justify-center"
+                    className="min-h-[44px] py-2 text-sm transition-all duration-150 ease-in-out data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:pl-[calc(0.5rem-2px)] group-data-[collapsible=icon]:!justify-center"
                   >
                     <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon />
+                      <item.icon className="size-4 shrink-0 transition-transform duration-150 ease-in-out group-hover:scale-110 group-data-[active=true]:text-primary" />
                       <span className="group-data-[collapsible=icon]:hidden">
                         {item.title}
                       </span>
