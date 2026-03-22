@@ -1,10 +1,10 @@
+import { useRef, useEffect } from "react"
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { LogOut, Menu } from "lucide-react"
-import { useSwipeSidebar } from "@/hooks/use-swipe-sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,8 +18,7 @@ import { authApi } from "@/lib/api"
 
 function DashboardContent() {
   const location = useLocation()
-  const { toggleSidebar } = useSidebar()
-  useSwipeSidebar()
+  const { toggleSidebar, isMobile, open } = useSidebar()
 
   const getPageName = () => {
     const path = location.pathname
@@ -28,6 +27,34 @@ function DashboardContent() {
   }
 
   const currentPath = getPageName()
+
+  const pillTouchStartX = useRef(0)
+
+  const handlePillTouchStart = (e: React.TouchEvent) => {
+    pillTouchStartX.current = e.touches[0].clientX
+  }
+
+  const handlePillTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - pillTouchStartX.current
+    if (dx > 40) {
+      e.preventDefault()
+      toggleSidebar()
+    }
+    // taps (dx <= 40) are handled by onClick, so do nothing here
+  }
+
+  useEffect(() => {
+    if (!isMobile) return
+    const pill = document.getElementById('sidebar-pill')
+    if (!pill) return
+    // remove class first to allow re-trigger on same route reload
+    pill.classList.remove('hinting')
+    // force reflow so the animation restarts cleanly
+    void pill.offsetWidth
+    pill.classList.add('hinting')
+    const timer = setTimeout(() => pill.classList.remove('hinting'), 920)
+    return () => clearTimeout(timer)
+  }, [location.pathname, isMobile])
 
   return (
     <>
@@ -75,13 +102,23 @@ function DashboardContent() {
           <Outlet />
         </div>
       </SidebarInset>
+      {isMobile && !open && (
+        <div
+          id="sidebar-pill"
+          onTouchStart={handlePillTouchStart}
+          onTouchEnd={handlePillTouchEnd}
+          onClick={toggleSidebar}
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-50 w-3.5 h-40 rounded-r-full bg-border/90 touch-none select-none transition-[background,opacity] duration-200 ease-in-out active:bg-border"
+          aria-label="Open sidebar"
+        />
+      )}
     </>
   )
 }
 
 export default function DashboardLayout() {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={window.innerWidth >= 768}>
       <DashboardContent />
     </SidebarProvider>
   )

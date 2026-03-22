@@ -100,3 +100,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+#sidebar-pill:active {
+  background-color: hsl(var(--border));
+  opacity: 1;
+}
+
+@keyframes pill-hint {
+  0%   { transform: translateY(-50%) translateX(0px);  opacity: 0.4; }
+  30%  { transform: translateY(-50%) translateX(10px); opacity: 1;   }
+  65%  { transform: translateY(-50%) translateX(3px);  opacity: 0.7; }
+  100% { transform: translateY(-50%) translateX(0px);  opacity: 0.4; }
+}
+
+#sidebar-pill.hinting {
+  animation: pill-hint 900ms cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
