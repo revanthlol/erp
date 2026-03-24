@@ -1,69 +1,25 @@
-# =========================
-# ENV FILES (IMPORTANT)
-# =========================
-.env
-.env.*
-!.env.example
-
-# Frontend env
-.env.local
-.env.development.local
-.env.production.local
-
-# Backend env
-server/.env
 
 # =========================
-# NODE / BUILD
+# DEPENDENCIES
 # =========================
 node_modules/
-dist/
-dist-ssr/
-build/
 
-# Backend build (if using tsc)
-server/dist/
-
-# =========================
-# LOGS
-# =========================
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
 
 # =========================
 # CACHE
 # =========================
-.cache/
 .vite/
 *.tsbuildinfo
 
 # =========================
-# OS / SYSTEM
+# LOGS
 # =========================
-.DS_Store
-Thumbs.db
+*.log
 
 # =========================
-# EDITORS
+# OS / EDITOR
 # =========================
+.DS_Store
 .vscode/*
 !.vscode/extensions.json
 .idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# =========================
-# MISC
-# =========================
-*.local
-
-# =========================
-# OPTIONAL (if you ever use python/venv)
-# =========================
-.venv/
