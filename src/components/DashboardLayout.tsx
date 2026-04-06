@@ -100,7 +100,7 @@ export default function DashboardLayout() {
       {/* Main Content Area */}
       <div 
         className={cn(
-          "flex flex-1 flex-col transition-all duration-300 ease-in-out",
+          "flex flex-1 flex-col min-w-0 transition-all duration-300 ease-in-out",
           !isMobile && desktopPadding
         )}
       >
