@@ -1,6 +1,4 @@
-import { useRef, useEffect } from "react"
-import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { useState, useEffect, useRef } from "react"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
@@ -13,12 +11,40 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet"
 import { useLocation, Outlet } from "react-router-dom"
 import { authApi } from "@/lib/api"
+import { SessionNavBar } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
-function DashboardContent() {
+export default function DashboardLayout() {
   const location = useLocation()
-  const { toggleSidebar, isMobile, open } = useSidebar()
+  const [isPinned, setIsPinned] = useState(true)
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  
+  const pillTouchStartX = useRef(0)
+
+  // Responsive check
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024
+      setIsMobile(mobile)
+      if (mobile) setIsPinned(false) // Never pin on mobile
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  // Auto-close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileOpen(false)
+  }, [location.pathname])
 
   const getPageName = () => {
     const path = location.pathname
@@ -28,8 +54,6 @@ function DashboardContent() {
 
   const currentPath = getPageName()
 
-  const pillTouchStartX = useRef(0)
-
   const handlePillTouchStart = (e: React.TouchEvent) => {
     pillTouchStartX.current = e.touches[0].clientX
   }
@@ -37,38 +61,51 @@ function DashboardContent() {
   const handlePillTouchEnd = (e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - pillTouchStartX.current
     if (dx > 40) {
-      e.preventDefault()
-      toggleSidebar()
+      setIsMobileOpen(true)
     }
-    // taps (dx <= 40) are handled by onClick, so do nothing here
   }
 
-  useEffect(() => {
-    if (!isMobile) return
-    const pill = document.getElementById('sidebar-pill')
-    if (!pill) return
-    // remove class first to allow re-trigger on same route reload
-    pill.classList.remove('hinting')
-    // force reflow so the animation restarts cleanly
-    void pill.offsetWidth
-    pill.classList.add('hinting')
-    const timer = setTimeout(() => pill.classList.remove('hinting'), 920)
-    return () => clearTimeout(timer)
-  }, [location.pathname, isMobile])
+  // Calculate left padding for desktop
+  // If pinned: 16rem (256px)
+  // If not pinned: 4rem (64px)
+  const desktopPadding = isPinned ? "pl-64" : "pl-16"
 
   return (
-    <>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 sticky top-0 z-10">
-          <button
-            onClick={toggleSidebar}
-            className="-ml-1 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Toggle sidebar"
+    <div className="flex min-h-screen bg-background">
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <SessionNavBar 
+          isPinned={isPinned} 
+          onHoverChange={setIsSidebarHovered}
+        />
+      )}
+
+      {/* Mobile Sidebar (Drawer) */}
+      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+        <SheetContent side="left" className="p-0 w-[16.05rem] border-none">
+          <SessionNavBar isPinned={true} className="relative w-64 border-none shadow-none" />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content Area */}
+      <div 
+        className={cn(
+          "flex flex-1 flex-col transition-all duration-300 ease-in-out",
+          !isMobile && desktopPadding
+        )}
+      >
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 lg:px-6 sticky top-0 z-20">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => isMobile ? setIsMobileOpen(true) : setIsPinned(!isPinned)}
+            className="hover:bg-accent"
           >
             <Menu className="size-5" />
-          </button>
-          <Separator orientation="vertical" className="mr-2 h-4" />
+          </Button>
+          
+          <Separator orientation="vertical" className="mx-2 h-4" />
+          
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
@@ -82,8 +119,8 @@ function DashboardContent() {
           </Breadcrumb>
 
           <div className="ml-auto flex items-center gap-4">
-            <div className="hidden sm:block text-sm text-muted-foreground">
-              Logged in as Student
+            <div className="hidden sm:block text-sm text-muted-foreground font-medium">
+              Student Portal
             </div>
             <ModeToggle />
             <Button
@@ -98,28 +135,24 @@ function DashboardContent() {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-6 pt-6 max-w-[1600px] w-full mx-auto animate-in fade-in-50 duration-500">
+        <main className="flex-1 p-4 lg:p-8 max-w-[1600px] w-full mx-auto animate-in fade-in-50 duration-500">
           <Outlet />
-        </div>
-      </SidebarInset>
-      {isMobile && !open && (
+        </main>
+      </div>
+
+      {/* Mobile Swipe/Click Pill */}
+      {isMobile && !isMobileOpen && (
         <div
           id="sidebar-pill"
           onTouchStart={handlePillTouchStart}
           onTouchEnd={handlePillTouchEnd}
-          onClick={toggleSidebar}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-50 w-3.5 h-40 rounded-r-full bg-border/90 touch-none select-none transition-[background,opacity] duration-200 ease-in-out active:bg-border"
+          onClick={() => setIsMobileOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-50 w-3.5 h-40 rounded-r-full bg-border/90 touch-none select-none transition-all duration-200 active:bg-primary/20 cursor-pointer flex items-center justify-center group"
           aria-label="Open sidebar"
-        />
+        >
+           <div className="w-1 h-8 rounded-full bg-muted-foreground/30 group-active:bg-primary/50 transition-colors" />
+        </div>
       )}
-    </>
-  )
-}
-
-export default function DashboardLayout() {
-  return (
-    <SidebarProvider defaultOpen={window.innerWidth >= 768}>
-      <DashboardContent />
-    </SidebarProvider>
+    </div>
   )
 }

@@ -118,3 +118,27 @@ export interface ExamResultRecord {
     result: string;
     attempts: number;
 }
+
+export interface FeePaidRecord {
+    date: string;
+    mode: string;
+    number: string;
+    amount: number;
+}
+
+export interface FeeDueRecord {
+    head: string;
+    amount: number;
+    dueDate: string;
+}
+
+export interface FeesResponse {
+    paid: {
+        history: FeePaidRecord[];
+        totalPaid: number;
+    };
+    due: {
+        list: FeeDueRecord[];
+        totalDue: number;
+    };
+}

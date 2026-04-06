@@ -85,6 +85,12 @@ export const authApi = {
     return data;
   },
 
+  // Fees Page
+  getFees: async () => {
+    const { data } = await api.get('/student/fees');
+    return data;
+  },
+
   // Generic pass-through
   get: async (url: string) => {
       const { data } = await api.get(url);

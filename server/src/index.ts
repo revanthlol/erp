@@ -145,6 +145,23 @@ app.get('/api/student/exams', async (req, res) => {
   }
 });
 
+app.get('/api/student/fees', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token || !sessionStore.has(token)) return res.status(401).json({ error: 'Unauthorized' });
+
+  const client = sessionStore.get(token)!;
+  try {
+    const data = await client.getFees();
+    res.json(data);
+  } catch (error: any) {
+    if (isSessionExpiredError(error)) {
+      sessionStore.delete(token);
+      return res.status(401).json({ error: 'Session expired' });
+    }
+    res.status(500).json({ error: 'Failed to sync fees' });
+  }
+});
+
 // --- NEW PROXY ROUTE ---
 app.get('/api/proxy/image', async (req, res) => {
     const token = req.query.token as string;

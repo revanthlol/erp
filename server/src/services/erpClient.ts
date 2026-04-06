@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { CookieJar } from 'tough-cookie';
 import * as cheerio from 'cheerio';
 import qs from 'qs';
-import { AttendanceHistory, AttendanceRecord, AttendanceResponse, ExamResultRecord, HourlyAttendanceResponse, HourlyLog, HourlyStats, InternalComponent, InternalMarkSubject, LoginCredentials, StudentProfileData, StudentSubject } from '../types';
+import { AttendanceHistory, AttendanceRecord, AttendanceResponse, ExamResultRecord, FeeDueRecord, FeePaidRecord, FeesResponse, HourlyAttendanceResponse, HourlyLog, HourlyStats, InternalComponent, InternalMarkSubject, LoginCredentials, StudentProfileData, StudentSubject } from '../types';
 
 export class ERPClient {
   private client: AxiosInstance;
@@ -543,6 +543,80 @@ async getAttendance(): Promise<AttendanceResponse> {
         throw e;
     }
   }
+
+  async getFees(): Promise<FeesResponse> {
+    const paidUrl = '/students/report/studentFinanceDetails.jsp';
+    const dueUrl = '/students/report/studentFeeDueDetails.jsp';
+    const referer = `${this.baseUrl}/students/template/PageLeft.jsp`;
+
+    console.log(`[Scraper] Syncing Fees Data...`);
+
+    const fees: FeesResponse = {
+        paid: { history: [], totalPaid: 0 },
+        due: { list: [], totalDue: 0 }
+    };
+
+    try {
+        // 1. Paid Details
+        const paidRes = await this.client.get(paidUrl, { headers: { Referer: referer } });
+        if (paidRes.status === 302 || (paidRes.data && paidRes.data.includes("Login"))) {
+            throw new Error("Session Expired");
+        }
+
+        const $paid = cheerio.load(paidRes.data);
+        $paid('#tblFinanceDetails tr').each((_, row) => {
+            const cols = $paid(row).find('td');
+            if (cols.length < 4 || $paid(row).hasClass('header') || $paid(row).hasClass('subheader')) return;
+
+            const date = $paid(cols[0]).text().trim();
+            const mode = $paid(cols[1]).text().trim();
+            const number = $paid(cols[2]).text().trim();
+            const amountStr = $paid(cols[3]).text().trim().replace(/,/g, '');
+            const amount = parseFloat(amountStr) || 0;
+
+            if (date && number) {
+                fees.paid.history.push({ date, mode, number, amount });
+            }
+        });
+
+        // Sum manually if needed, or extract from "Total" row
+        const totalRow = $paid('#tblFinanceDetails tr.subheader').last();
+        if (totalRow.text().toLowerCase().includes('total')) {
+            const totalStr = totalRow.find('td').last().text().trim().replace(/,/g, '');
+            fees.paid.totalPaid = parseFloat(totalStr) || 0;
+        } else {
+             fees.paid.totalPaid = fees.paid.history.reduce((a, b) => a + b.amount, 0);
+        }
+
+        // 2. Due Details
+        const dueRes = await this.client.get(dueUrl, { headers: { Referer: referer } });
+        const $due = cheerio.load(dueRes.data);
+        
+        $due('#tblFeeDueDetails tr').each((_, row) => {
+            if ($due(row).hasClass('header') || $due(row).hasClass('subheader') || $due(row).hasClass('subheader1')) return;
+            const cols = $due(row).find('td');
+            
+            // Expected columns: Fee Type, Fee Head, Due Date, Due Amount, [Action buttons...]
+            if (cols.length >= 4) {
+                 const type = $due(cols[0]).text().trim();
+                 const head = $due(cols[1]).text().trim();
+                 const dueDate = $due(cols[2]).text().trim();
+                 const amountStr = $due(cols[3]).text().trim().replace(/,/g, '');
+                 const amount = parseFloat(amountStr) || 0;
+
+                 if (head && amount > 0) {
+                     fees.due.list.push({ head: `${type} - ${head}`, amount, dueDate });
+                     fees.due.totalDue += amount;
+                 }
+            }
+        });
+
+        console.log(`[Scraper] Fees Sync Complete. Paid: ${fees.paid.totalPaid}, Due: ${fees.due.totalDue}`);
+        return fees;
+
+    } catch (e) {
+        console.error('[Scraper] Failed to sync fees', e);
+        throw e;
+    }
+  }
 }
-
-
