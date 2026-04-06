@@ -165,67 +165,69 @@ export default function Attendance() {
                     <CardTitle>Subject-wise Breakdown</CardTitle>
                     <CardDescription>Analysis per subject based on 75% requirement</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                <TableHead className="w-[80px]">Code</TableHead>
-                                <TableHead className="min-w-[200px]">Subject Name</TableHead>
-                                <TableHead className="text-center hidden sm:table-cell">Hours (P/T)</TableHead>
-                                <TableHead className="w-[180px]">Status</TableHead>
-                                <TableHead className="text-right">Action Plan</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {subjects.map((sub, idx) => {
-                                const status = calculateStatus(sub.pct);
-                                const recover = getClassesToRecover(sub.total, sub.present);
+                <CardContent className="p-0 sm:p-6">
+                    <div className="overflow-x-auto pb-4">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                    <TableHead className="w-[80px]">Code</TableHead>
+                                    <TableHead className="min-w-[200px]">Subject Name</TableHead>
+                                    <TableHead className="text-center hidden sm:table-cell">Hours (P/T)</TableHead>
+                                    <TableHead className="w-[180px]">Status</TableHead>
+                                    <TableHead className="text-right">Action Plan</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {subjects.map((sub, idx) => {
+                                    const status = calculateStatus(sub.pct);
+                                    const recover = getClassesToRecover(sub.total, sub.present);
 
-                                return (
-                                    <TableRow key={idx}>
-                                        <TableCell className="font-mono font-medium text-xs text-muted-foreground">
-                                            {sub.code}
-                                        </TableCell>
-                                        <TableCell className="font-medium text-sm">
-                                            <div className="flex flex-col">
-                                                <span>{sub.name}</span>
-                                                <span className="sm:hidden text-xs text-muted-foreground mt-1">
-                                                    {sub.present} / {sub.total} classes
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center text-sm hidden sm:table-cell">
-                                            <span className="font-bold">{sub.present}</span>
-                                            <span className="text-muted-foreground"> / {sub.total}</span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="space-y-1.5">
-                                                <div className="flex justify-between text-xs">
-                                                    <span className={status.text + " font-bold"}>{sub.pct.toFixed(1)}%</span>
+                                    return (
+                                        <TableRow key={idx}>
+                                            <TableCell className="font-mono font-medium text-xs text-muted-foreground">
+                                                {sub.code}
+                                            </TableCell>
+                                            <TableCell className="font-medium text-sm">
+                                                <div className="flex flex-col">
+                                                    <span>{sub.name}</span>
+                                                    <span className="sm:hidden text-xs text-muted-foreground mt-1">
+                                                        {sub.present} / {sub.total} classes
+                                                    </span>
                                                 </div>
-                                                <Progress 
-                                                    value={sub.pct} 
-                                                    className={cn("h-2", status.bg)} 
-                                                    indicatorClassName={status.color} 
-                                                />
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {recover > 0 ? (
-                                                <Badge variant="destructive" className="whitespace-nowrap font-normal text-xs animate-pulse">
-                                                    Attend next {recover}
-                                                </Badge>
-                                            ) : (
-                                                <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-900/20 font-normal text-xs">
-                                                    On Track
-                                                </Badge>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
-                        </TableBody>
-                    </Table>
+                                            </TableCell>
+                                            <TableCell className="text-center text-sm hidden sm:table-cell">
+                                                <span className="font-bold">{sub.present}</span>
+                                                <span className="text-muted-foreground"> / {sub.total}</span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between text-xs">
+                                                        <span className={status.text + " font-bold"}>{sub.pct.toFixed(1)}%</span>
+                                                    </div>
+                                                    <Progress 
+                                                        value={sub.pct} 
+                                                        className={cn("h-2", status.bg)} 
+                                                        indicatorClassName={status.color} 
+                                                    />
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {recover > 0 ? (
+                                                    <Badge variant="destructive" className="whitespace-nowrap font-normal text-xs animate-pulse">
+                                                        Attend next {recover}
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-900/20 font-normal text-xs">
+                                                        On Track
+                                                    </Badge>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
 

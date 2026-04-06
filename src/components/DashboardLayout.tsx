@@ -15,14 +15,17 @@ import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet"
-import { useLocation, Outlet } from "react-router-dom"
+import { useLocation, Outlet, Link } from "react-router-dom"
 import { authApi } from "@/lib/api"
 import { SessionNavBar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 export default function DashboardLayout() {
   const location = useLocation()
-  const [isPinned, setIsPinned] = useState(true)
+  const [isPinned, setIsPinned] = useState(() => {
+    const saved = sessionStorage.getItem("sidebar_pinned")
+    return saved === null ? true : saved === "true"
+  })
   const [isSidebarHovered, setIsSidebarHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
@@ -34,12 +37,19 @@ export default function DashboardLayout() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024
       setIsMobile(mobile)
-      if (mobile) setIsPinned(false) // Never pin on mobile
+      // When mobile is detected, we don't pin, but we don't overwrite the user's preference in sessionStorage
     }
     checkMobile()
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
+
+  // Sync pinning preference to session
+  useEffect(() => {
+    if (!isMobile) {
+      sessionStorage.setItem("sidebar_pinned", isPinned.toString())
+    }
+  }, [isPinned, isMobile])
 
   // Auto-close mobile sidebar on route change
   useEffect(() => {
@@ -68,7 +78,7 @@ export default function DashboardLayout() {
   // Calculate left padding for desktop
   // If pinned: 16rem (256px)
   // If not pinned: 4rem (64px)
-  const desktopPadding = isPinned ? "pl-64" : "pl-16"
+  const desktopPadding = isPinned ? "pl-64" : "pl-20"
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -109,11 +119,13 @@ export default function DashboardLayout() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">ERP</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link to="/">ERP</Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>{currentPath}</BreadcrumbPage>
+                <BreadcrumbPage className="font-semibold text-primary">{currentPath}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

@@ -37,7 +37,7 @@ const sidebarVariants = {
     width: "16rem",
   },
   closed: {
-    width: "4rem",
+    width: "5rem",
   },
 };
 
@@ -150,8 +150,8 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
         {/* Header */}
         <div className="flex h-16 w-full shrink-0 items-center border-b px-4">
           <div className="flex items-center gap-3 w-full">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Avatar className="size-8 rounded-lg">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground overflow-hidden">
+              <Avatar className="size-8">
                 <AvatarImage src="/logo.png" />
                 <AvatarFallback className="bg-primary text-primary-foreground">LA</AvatarFallback>
               </Avatar>
@@ -180,11 +180,18 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
               <Link
                 key={item.url}
                 to={item.url}
+                onClick={() => {
+                  if (!isPinned) {
+                    setIsHovered(false);
+                    onHoverChange?.(false);
+                  }
+                }}
                 className={cn(
-                  "group flex h-10 w-full items-center rounded-md px-3 transition-colors",
+                  "group flex h-12 w-full items-center rounded-md transition-all duration-200",
                   location.pathname === item.url
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  effectivelyOpen ? "px-3" : "justify-center"
                 )}
               >
                 <item.icon className={cn("size-5 shrink-0", location.pathname === item.url && "text-primary")} />
@@ -214,11 +221,11 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
             size="sm"
             onClick={handleLogout}
             className={cn(
-              "mb-2 w-full justify-start gap-3 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all",
+              "mb-2 w-full justify-start gap-4 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all",
               !effectivelyOpen && "justify-center px-0"
             )}
           >
-            <LogOut className="size-4 shrink-0" />
+            <LogOut className="size-5 shrink-0" />
             <AnimatePresence>
               {effectivelyOpen && (
                 <motion.span
@@ -226,7 +233,7 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
                   initial="closed"
                   animate="open"
                   exit="closed"
-                  className="text-xs font-semibold"
+                  className="text-[13px] font-bold tracking-tight"
                 >
                   Sign Out
                 </motion.span>
@@ -234,52 +241,34 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
             </AnimatePresence>
           </Button>
 
-          {/* Profile Section */}
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "flex h-12 w-full items-center justify-start gap-3 p-2 hover:bg-accent",
-                  !effectivelyOpen && "justify-center p-0"
-                )}
-              >
-                <Avatar className="size-8 rounded-lg shrink-0 border">
-                  <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                </Avatar>
-                <AnimatePresence>
-                  {effectivelyOpen && (
-                    <motion.div
-                      variants={textVariants}
-                      initial="closed"
-                      animate="open"
-                      exit="closed"
-                      className="flex flex-1 items-center justify-between overflow-hidden text-left"
-                    >
-                      <div className="flex flex-col overflow-hidden">
-                        <p className="truncate text-xs font-bold uppercase">{displayName}</p>
-                        <p className="truncate text-[10px] text-muted-foreground">{displayUid}</p>
-                      </div>
-                      <ChevronsUpDown className="ml-auto size-3 shrink-0 opacity-50" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side={effectivelyOpen ? "right" : "top"} align="end" sideOffset={12} className="w-56">
-              <DropdownMenuItem disabled className="text-xs font-bold opacity-70">PROFILE SETTINGS</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/" className="flex items-center gap-2">
-                  <Settings className="size-4" /> Account Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                <LogOut className="size-4 mr-2" /> Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Profile Section (Static) */}
+          <div
+            className={cn(
+              "flex h-12 w-full items-center justify-start gap-4 transition-all duration-200",
+              effectivelyOpen ? "p-2" : "justify-center"
+            )}
+          >
+            <Avatar className="size-8 shrink-0 border-2 border-background shadow-sm">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <AnimatePresence>
+              {effectivelyOpen && (
+                <motion.div
+                  variants={textVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  className="flex flex-1 items-center justify-between overflow-hidden text-left"
+                >
+                  <div className="flex flex-col justify-center overflow-hidden">
+                    <p className="truncate text-[11px] font-black uppercase leading-tight tracking-tight">{displayName}</p>
+                    <p className="truncate text-[10px] text-muted-foreground leading-none font-bold">{displayUid}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>

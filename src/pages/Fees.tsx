@@ -63,7 +63,12 @@ export default function Fees() {
         setLoading(true);
         const res = await authApi.getFees();
         setData(res);
-        setDisclaimerOpen(true);
+        
+        // Only show disclaimer once per session
+        if (!sessionStorage.getItem("erp_fees_disclaimer_shown")) {
+            setDisclaimerOpen(true);
+            sessionStorage.setItem("erp_fees_disclaimer_shown", "true");
+        }
       } catch (err) {
         console.error("Failed to fetch fees:", err);
         setError("Failed to fetch fee details from ERP.");
@@ -314,25 +319,32 @@ export default function Fees() {
                         <Table>
                             <TableHeader className="bg-muted/40">
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Receipt No</TableHead>
-                                    <TableHead>Mode</TableHead>
-                                    <TableHead className="text-right">Amount (₹)</TableHead>
+                                    <TableHead className="w-[100px] md:w-auto text-[11px] uppercase tracking-wider">Date</TableHead>
+                                    <TableHead className="text-[11px] uppercase tracking-wider">Receipt No</TableHead>
+                                    <TableHead className="hidden sm:table-cell text-[11px] uppercase tracking-wider">Mode</TableHead>
+                                    <TableHead className="text-right text-[11px] uppercase tracking-wider">Amount (₹)</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {paid.history.length > 0 ? (
                                     paid.history.map((txn, idx) => (
-                                        <TableRow key={idx}>
-                                            <TableCell className="font-medium text-muted-foreground text-xs">{txn.date}</TableCell>
-                                            <TableCell className="font-mono text-xs">{txn.number}</TableCell>
-                                            <TableCell><Badge variant="outline" className="font-normal text-xs text-muted-foreground">{txn.mode}</Badge></TableCell>
-                                            <TableCell className="text-right font-bold text-sm">₹{txn.amount.toLocaleString()}</TableCell>
+                                        <TableRow key={idx} className="group hover:bg-muted/30 transition-colors">
+                                            <TableCell className="font-medium text-muted-foreground text-xs md:text-sm py-4">
+                                                {txn.date}
+                                                <div className="sm:hidden mt-1 font-normal text-[10px] text-primary/60">{txn.mode}</div>
+                                            </TableCell>
+                                            <TableCell className="font-mono text-xs md:text-sm truncate max-w-[100px] md:max-w-none">{txn.number}</TableCell>
+                                            <TableCell className="hidden sm:table-cell">
+                                                <Badge variant="outline" className="font-normal text-[10px] text-muted-foreground bg-muted/30">{txn.mode}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right font-bold text-sm group-hover:text-primary transition-colors">
+                                                ₹{txn.amount.toLocaleString()}
+                                            </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No payment history found.</TableCell>
+                                        <TableCell colSpan={4} className="text-center py-12 text-muted-foreground italic">No payment history found.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>

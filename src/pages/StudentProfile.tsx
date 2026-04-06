@@ -4,28 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RefreshCw, Settings, Save, Lock, Mail, Phone, MapPin, Loader2 } from "lucide-react";
+import { RefreshCw, MapPin, Mail, Phone, Loader2 } from "lucide-react";
 import { authApi } from "@/lib/api";
 
 export default function StudentProfile() {
   const [student, setStudent] = useState<any>(null); // Initialize null
   const [isLoading, setIsLoading] = useState(true);  // Initial Fetch Loading
   const [error, setError] = useState("");
-
-  const [editForm, setEditForm] = useState<any>({});
-  const [saving, setSaving] = useState(false);
 
     // Helper to build the secure proxy URL
   const getSecurePhotoUrl = (originalUrl: string) => {
@@ -48,21 +35,11 @@ export default function StudentProfile() {
       try {
           const data = await authApi.getProfile();
           setStudent(data);
-          setEditForm(data); // Pre-fill edit form
       } catch (err) {
           setError("Failed to load profile. Please relogin.");
       } finally {
           setIsLoading(false);
       }
-  };
-
-  const handleSave = () => {
-      setSaving(true);
-      setTimeout(() => {
-          setStudent(editForm);
-          setSaving(false);
-          // Normally close sheet here
-      }, 1000);
   };
 
   if (isLoading) {
@@ -92,100 +69,6 @@ export default function StudentProfile() {
               <CardTitle className="text-xl font-bold tracking-tight text-primary">General Information</CardTitle>
               <CardDescription>View your basic academic and personal records.</CardDescription>
           </div>
-          
-          {/* Settings Trigger */}
-          <Sheet>
-            <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
-                    <Settings className="w-4 h-4" /> Edit Profile
-                </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[400px] sm:w-[540px]">
-                <SheetHeader>
-                    <SheetTitle>Profile Settings</SheetTitle>
-                    <SheetDescription>
-                        Make changes to your contact information or account security here.
-                    </SheetDescription>
-                </SheetHeader>
-                
-                <Tabs defaultValue="profile" className="w-full mt-6">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="profile">Profile Details</TabsTrigger>
-                        <TabsTrigger value="security">Security</TabsTrigger>
-                    </TabsList>
-                    
-                    {/* Tab: Edit Details */}
-                    <TabsContent value="profile" className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="contact">Mobile Number</Label>
-                            <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    id="contact" 
-                                    className="pl-9"
-                                    value={editForm.contact || ''}
-                                    onChange={(e) => setEditForm({...editForm, contact: e.target.value})} 
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    id="email" 
-                                    className="pl-9"
-                                    value={editForm.email || ''}
-                                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="address">Residential Address</Label>
-                             <div className="relative">
-                                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <textarea 
-                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
-                                    id="address"
-                                    value={editForm.address || ''}
-                                    onChange={(e) => setEditForm({...editForm, address: e.target.value})}
-                                />
-                             </div>
-                        </div>
-                    </TabsContent>
-                    
-                    {/* Tab: Change Password */}
-                    <TabsContent value="security" className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Current Password</Label>
-                            <Input type="password" placeholder="••••••••" />
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                            <Label>New Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input type="password" className="pl-9" />
-                            </div>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>Confirm New Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input type="password" className="pl-9" />
-                            </div>
-                        </div>
-                    </TabsContent>
-                </Tabs>
-
-                <SheetFooter className="mt-4 sm:justify-end">
-                    <Button type="submit" onClick={handleSave} disabled={saving}>
-                        {saving ? "Saving..." : <><Save className="mr-2 h-4 w-4"/> Save Changes</>}
-                    </Button>
-                </SheetFooter>
-            </SheetContent>
-          </Sheet>
-
         </CardHeader>
         <CardContent className="pt-6 grid gap-6">
           
@@ -233,13 +116,6 @@ export default function StudentProfile() {
                     /> 
                     <AvatarFallback className="text-4xl">ST</AvatarFallback>
                 </Avatar>
-                <div className="absolute top-4 right-4 sm:hidden">
-                    <Sheet>
-                        <SheetTrigger asChild>
-                           <Button size="icon" variant="ghost"><Settings className="w-5 h-5"/></Button>
-                        </SheetTrigger>
-                    </Sheet>
-                </div>
             </div>
             <CardContent className="text-center pt-6 pb-6">
                 <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 px-4 py-1 text-sm dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
