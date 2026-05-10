@@ -19,6 +19,7 @@ import {
   ChevronsUpDown,
   LayoutDashboard,
   Settings,
+  RefreshCw,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation } from "react-router-dom";
@@ -79,9 +80,17 @@ interface SessionNavBarProps {
   isPinned?: boolean;
   onHoverChange?: (hovered: boolean) => void;
   className?: string;
+  onRefreshSession?: () => void | Promise<void>;
+  refreshingSession?: boolean;
 }
 
-export function SessionNavBar({ isPinned = true, onHoverChange, className }: SessionNavBarProps) {
+export function SessionNavBar({
+  isPinned = true,
+  onHoverChange,
+  className,
+  onRefreshSession,
+  refreshingSession = false,
+}: SessionNavBarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const [profile, setProfile] = useState<{
@@ -215,6 +224,33 @@ export function SessionNavBar({ isPinned = true, onHoverChange, className }: Ses
 
         {/* Footer / Account */}
         <div className="mt-auto flex flex-col border-t bg-muted/20 p-3">
+          {/* Quick Refresh Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRefreshSession}
+            disabled={refreshingSession || !onRefreshSession}
+            className={cn(
+              "mb-2 w-full justify-start gap-4 px-3 text-primary hover:bg-primary/10 hover:text-primary transition-all",
+              !effectivelyOpen && "justify-center px-0"
+            )}
+          >
+            <RefreshCw className={cn("size-5 shrink-0", refreshingSession && "animate-spin")} />
+            <AnimatePresence>
+              {effectivelyOpen && (
+                <motion.span
+                  variants={textVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  className="text-[13px] font-bold tracking-tight"
+                >
+                  Refresh Session
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Button>
+
           {/* Quick Logout Button */}
           <Button
             variant="ghost"

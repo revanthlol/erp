@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
-import { LogOut, Menu } from "lucide-react"
+import { LogOut, Menu, RefreshCw } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,6 +19,7 @@ import { useLocation, Outlet, Link } from "react-router-dom"
 import { authApi } from "@/lib/api"
 import { SessionNavBar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export default function DashboardLayout() {
   const location = useLocation()
@@ -29,6 +30,7 @@ export default function DashboardLayout() {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isRefreshingSession, setIsRefreshingSession] = useState(false)
   
   const pillTouchStartX = useRef(0)
 
@@ -75,6 +77,22 @@ export default function DashboardLayout() {
     }
   }
 
+  const handleRefreshSession = async () => {
+    if (isRefreshingSession) return
+
+    setIsRefreshingSession(true)
+    try {
+      await authApi.refreshSession()
+      toast.success("ERP session refreshed")
+      window.location.reload()
+    } catch (error) {
+      console.error("ERP session refresh failed", error)
+      toast.error("Failed to refresh ERP session")
+    } finally {
+      setIsRefreshingSession(false)
+    }
+  }
+
   // Calculate left padding for desktop
   // If pinned: 16rem (256px)
   // If not pinned: 4rem (64px)
@@ -87,13 +105,20 @@ export default function DashboardLayout() {
         <SessionNavBar 
           isPinned={isPinned} 
           onHoverChange={setIsSidebarHovered}
+          onRefreshSession={handleRefreshSession}
+          refreshingSession={isRefreshingSession}
         />
       )}
 
       {/* Mobile Sidebar (Drawer) */}
-      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="p-0 w-[16.05rem] border-none">
-          <SessionNavBar isPinned={true} className="relative w-64 border-none shadow-none" />
+          <SessionNavBar
+            isPinned={true}
+            className="relative w-64 border-none shadow-none"
+            onRefreshSession={handleRefreshSession}
+            refreshingSession={isRefreshingSession}
+          />
         </SheetContent>
       </Sheet>
 
@@ -135,6 +160,16 @@ export default function DashboardLayout() {
               Student Portal
             </div>
             <ModeToggle />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefreshSession}
+              disabled={isRefreshingSession}
+              className="border-primary/20 text-primary hover:bg-primary/10"
+              title="Refresh ERP session"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshingSession ? "animate-spin" : ""}`} />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
