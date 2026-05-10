@@ -10,9 +10,22 @@ const erpClient_1 = require("./services/erpClient");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
-const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+const defaultOrigins = ['http://localhost:5173', 'https://erp-la.vercel.app'];
+const allowedOrigins = [
+    ...defaultOrigins,
+    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [])
+]
+    .map((origin) => origin.trim())
+    .filter((origin, index, list) => list.indexOf(origin) === index)
+    .filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: allowedOrigin === '*' ? true : allowedOrigin,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+            callback(null, true);
+            return;
+        }
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true
 }));
 app.use(express_1.default.json());
