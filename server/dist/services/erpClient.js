@@ -84,6 +84,7 @@ class ERPClient {
         });
     }
     async login(creds) {
+        this.creds = creds;
         const loginUrl = '/students/loginManager/youLogin.jsp';
         // Payload from logs
         const payload = {
@@ -116,6 +117,12 @@ class ERPClient {
             console.error('[Auth] Failed', e);
             return false;
         }
+    }
+    async reconnect() {
+        if (!this.creds)
+            return false;
+        this.jar = new tough_cookie_1.CookieJar();
+        return this.login(this.creds);
     }
     async getStudentProfile() {
         const profilePath = '/students/report/studentProfile.jsp';

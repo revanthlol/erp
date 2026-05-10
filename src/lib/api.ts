@@ -17,11 +17,16 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// Response Interceptor: Handle Session Timeouts (401)
+// Response Interceptor: Handle ERP expiry separately from app auth failures
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // If session is dead (401)
+    if (error.response?.status === 440) {
+      window.dispatchEvent(new Event("erp:session-expired"));
+      return Promise.reject(error);
+    }
+
+    // If app auth is dead (401)
     if (error.response?.status === 401) {
       const isLogin = window.location.pathname.includes('/login');
       
@@ -95,6 +100,11 @@ export const authApi = {
   get: async (url: string) => {
       const { data } = await api.get(url);
       return data;
+  },
+
+  refreshSession: async () => {
+    const { data } = await api.post('/refresh-session');
+    return data;
   },
 
   // Logout - Explicitly cleans everything

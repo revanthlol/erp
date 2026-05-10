@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { TimerReset, LogOut } from "lucide-react";
+import { TimerReset, RefreshCw } from "lucide-react";
 import { authApi } from "@/lib/api";
 
 // 18 Minutes
@@ -18,6 +18,7 @@ const IDLE_TIMEOUT_MS = 18 * 60 * 1000;
 
 export function SessionAlert() {
   const [open, setOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const lastActivity = useRef<number>(Date.now());
 
   const showSessionModal = useCallback(() => {
@@ -49,13 +50,25 @@ export function SessionAlert() {
   // 2. Network 401 Listener
   useEffect(() => {
     const handleAuthEvent = () => showSessionModal();
+    window.addEventListener("erp:session-expired", handleAuthEvent);
     window.addEventListener("auth:session-expired", handleAuthEvent);
-    return () => window.removeEventListener("auth:session-expired", handleAuthEvent);
+    return () => {
+      window.removeEventListener("erp:session-expired", handleAuthEvent);
+      window.removeEventListener("auth:session-expired", handleAuthEvent);
+    };
   }, [showSessionModal]);
 
-  const handleReLogin = () => {
-    setOpen(false);
-    authApi.logout(); 
+  const handleRefreshSession = async () => {
+    setRefreshing(true);
+    try {
+      await authApi.refreshSession();
+      setOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("ERP session refresh failed", error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
@@ -68,21 +81,22 @@ export function SessionAlert() {
             <div className="p-2 rounded-full bg-amber-50 dark:bg-amber-900/20">
                 <TimerReset className="h-6 w-6" />
             </div>
-            <AlertDialogTitle>Session Expired</AlertDialogTitle>
+            <AlertDialogTitle>ERP Session Expired</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-base text-foreground/80 leading-relaxed">
-            You have been inactive for a while. For your security, the university system automatically closes sessions.
+            Your ERP session expired after inactivity, but your app login is still active.
             <br/><br/>
-            Please sign in again to continue.
+            Refresh the ERP session to continue without logging in again.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction 
-            onClick={handleReLogin}
+            onClick={handleRefreshSession}
+            disabled={refreshing}
             className="bg-primary hover:bg-primary/90 text-black font-medium gap-2"
           >
-            <LogOut className="h-4 w-4" /> 
-            Login Again
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /> 
+            Refresh Session
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -8,6 +8,7 @@ export class ERPClient {
   private client: AxiosInstance;
   private jar: CookieJar;
   private baseUrl: string;
+  private creds?: LoginCredentials;
 
   constructor() {
     this.baseUrl = process.env.ERP_BASE_URL || 'http://202.160.160.58:8080/lastudentportal';
@@ -52,6 +53,7 @@ export class ERPClient {
   }
 
   async login(creds: LoginCredentials): Promise<boolean> {
+    this.creds = creds;
     const loginUrl = '/students/loginManager/youLogin.jsp';
     
     // Payload from logs
@@ -88,6 +90,13 @@ export class ERPClient {
         console.error('[Auth] Failed', e);
         return false;
     }
+  }
+
+  async reconnect(): Promise<boolean> {
+    if (!this.creds) return false;
+
+    this.jar = new CookieJar();
+    return this.login(this.creds);
   }
 
 async getStudentProfile(): Promise<StudentProfileData> {

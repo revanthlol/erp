@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { ERPClient } from './services/erpClient';
@@ -22,6 +22,13 @@ const sessionStore = new Map<string, ERPClient>();
 const isSessionExpiredError = (error: any) => {
   const message = String(error?.message || error || '');
   return message.toLowerCase().includes('session expired');
+};
+
+const handleSessionExpired = (res: Response) => {
+  return res.status(440).json({
+    error: 'ERP session expired',
+    reconnectable: true
+  });
 };
 
 app.post('/api/login', async (req, res) => {
@@ -53,8 +60,7 @@ app.get('/api/student/profile', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to scrape profile' });
   }
@@ -70,8 +76,7 @@ app.get('/api/student/subjects', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to scrape subjects' });
   }
@@ -87,8 +92,7 @@ app.get('/api/student/attendance', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to scrape attendance' });
   }
@@ -104,8 +108,7 @@ app.get('/api/student/attendance/hourly', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to fetch hourly logs' });
   }
@@ -121,8 +124,7 @@ app.get('/api/student/internals', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to scrape internals' });
   }
@@ -138,8 +140,7 @@ app.get('/api/student/exams', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to scrape exams' });
   }
@@ -155,10 +156,39 @@ app.get('/api/student/fees', async (req, res) => {
     res.json(data);
   } catch (error: any) {
     if (isSessionExpiredError(error)) {
-      sessionStore.delete(token);
-      return res.status(401).json({ error: 'Session expired' });
+      return handleSessionExpired(res);
     }
     res.status(500).json({ error: 'Failed to sync fees' });
+  }
+});
+
+app.post('/api/refresh-session', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token || !sessionStore.has(token)) {
+    return res.status(401).json({
+      error: 'Unauthorized'
+    });
+  }
+
+  const client = sessionStore.get(token)!;
+
+  try {
+    const success = await client.reconnect();
+
+    if (!success) {
+      return res.status(401).json({
+        error: 'Reconnect failed'
+      });
+    }
+
+    return res.json({
+      success: true
+    });
+  } catch {
+    return res.status(500).json({
+      error: 'Reconnect failed'
+    });
   }
 });
 
