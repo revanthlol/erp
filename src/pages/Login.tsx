@@ -48,6 +48,7 @@ export default function Login() {
       if (response.success && response.token) {
         localStorage.setItem("auth_token", response.token); 
         localStorage.setItem("erp-auth", "true"); 
+        sessionStorage.setItem("erp-refresh-session-tip", "1");
         navigate("/");
       } else {
         setError("Invalid credentials or login failed on ERP.");

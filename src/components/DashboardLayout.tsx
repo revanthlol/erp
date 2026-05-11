@@ -31,6 +31,7 @@ export default function DashboardLayout() {
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isRefreshingSession, setIsRefreshingSession] = useState(false)
+  const [showRefreshHint, setShowRefreshHint] = useState(false)
   
   const pillTouchStartX = useRef(0)
 
@@ -57,6 +58,15 @@ export default function DashboardLayout() {
   useEffect(() => {
     setIsMobileOpen(false)
   }, [location.pathname])
+
+  // Show the refresh hint exactly once after a manual login.
+  useEffect(() => {
+    const shouldShowHint = sessionStorage.getItem("erp-refresh-session-tip") === "1"
+    if (shouldShowHint) {
+      setShowRefreshHint(true)
+      sessionStorage.removeItem("erp-refresh-session-tip")
+    }
+  }, [])
 
   const getPageName = () => {
     const path = location.pathname
@@ -101,12 +111,14 @@ export default function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      {!isMobile && (
+        {!isMobile && (
         <SessionNavBar 
           isPinned={isPinned} 
           onHoverChange={setIsSidebarHovered}
           onRefreshSession={handleRefreshSession}
           refreshingSession={isRefreshingSession}
+          showRefreshHint={showRefreshHint}
+          onDismissRefreshHint={() => setShowRefreshHint(false)}
         />
       )}
 
@@ -118,6 +130,8 @@ export default function DashboardLayout() {
             className="relative w-64 border-none shadow-none"
             onRefreshSession={handleRefreshSession}
             refreshingSession={isRefreshingSession}
+            showRefreshHint={showRefreshHint}
+            onDismissRefreshHint={() => setShowRefreshHint(false)}
           />
         </SheetContent>
       </Sheet>

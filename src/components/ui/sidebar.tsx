@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   Settings,
   RefreshCw,
+  CornerDownLeft,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation } from "react-router-dom";
@@ -82,6 +83,8 @@ interface SessionNavBarProps {
   className?: string;
   onRefreshSession?: () => void | Promise<void>;
   refreshingSession?: boolean;
+  showRefreshHint?: boolean;
+  onDismissRefreshHint?: () => void;
 }
 
 export function SessionNavBar({
@@ -90,8 +93,12 @@ export function SessionNavBar({
   className,
   onRefreshSession,
   refreshingSession = false,
+  showRefreshHint = false,
+  onDismissRefreshHint,
 }: SessionNavBarProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [hintVisible, setHintVisible] = useState(showRefreshHint);
+  const [hintPulsing, setHintPulsing] = useState(showRefreshHint);
   const location = useLocation();
   const [profile, setProfile] = useState<{
     name: string;
@@ -127,6 +134,27 @@ export function SessionNavBar({
       .slice(0, 2)
       .toUpperCase() || "ST";
   const avatarUrl = authApi.getProxyImageUrl(profile?.photoUrl);
+
+  useEffect(() => {
+    setHintVisible(showRefreshHint);
+    setHintPulsing(showRefreshHint);
+  }, [showRefreshHint]);
+
+  useEffect(() => {
+    if (!showRefreshHint) return;
+
+    const timerId = window.setTimeout(() => {
+      setHintPulsing(false);
+    }, 3600);
+
+    return () => window.clearTimeout(timerId);
+  }, [showRefreshHint]);
+
+  const dismissHint = () => {
+    setHintVisible(false);
+    setHintPulsing(false);
+    onDismissRefreshHint?.();
+  };
 
   const handleMouseEnter = () => {
     if (!isPinned) {
@@ -223,18 +251,73 @@ export function SessionNavBar({
         </ScrollArea>
 
         {/* Footer / Account */}
-        <div className="mt-auto flex flex-col border-t bg-muted/20 p-3">
+        <div className="relative mt-auto flex flex-col border-t bg-muted/20 p-3 overflow-visible">
+          <AnimatePresence>
+            {hintVisible && effectivelyOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="absolute bottom-[4.4rem] left-3 right-3 z-20"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-background/80 p-3 shadow-xl shadow-black/10 backdrop-blur-md dark:border-white/5 dark:bg-zinc-950/75">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-cyan-500/10 pointer-events-none" />
+                  <div className="absolute -bottom-2 left-5 text-primary/80">
+                    <CornerDownLeft className="h-4 w-4" />
+                  </div>
+                  <div className="relative flex items-start gap-3">
+                    <div
+                      className={cn(
+                        "relative mt-1.5 size-2.5 shrink-0 rounded-full bg-primary",
+                        hintPulsing && "after:absolute after:inset-0 after:rounded-full after:bg-primary/40 after:animate-ping after:content-['']"
+                      )}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground">Refresh Session</p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        Reconnects ERP automatically if session expires.
+                      </p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={dismissHint}
+                          className="h-8 rounded-full px-3 text-xs font-semibold"
+                        >
+                          Got it
+                        </Button>
+                        <span className="text-[11px] text-muted-foreground">
+                          Click refresh to dismiss too.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Quick Refresh Button */}
           <Button
             variant="ghost"
             size="sm"
-            onClick={onRefreshSession}
+            onClick={() => {
+              dismissHint();
+              onRefreshSession?.();
+            }}
             disabled={refreshingSession || !onRefreshSession}
             className={cn(
-              "mb-2 w-full justify-start gap-4 px-3 text-primary hover:bg-primary/10 hover:text-primary transition-all",
+              "relative mb-2 w-full justify-start gap-4 px-3 text-primary hover:bg-primary/10 hover:text-primary transition-all overflow-visible",
+              hintVisible && effectivelyOpen && "ring-1 ring-primary/35 shadow-[0_0_0_8px_rgba(59,130,246,0.08)]",
+              hintPulsing && effectivelyOpen && "animate-[pulse_1.8s_ease-in-out_infinite]",
               !effectivelyOpen && "justify-center px-0"
             )}
           >
+            {hintVisible && effectivelyOpen && (
+              <span className="absolute inset-0 rounded-md bg-primary/10 blur-md" aria-hidden="true" />
+            )}
             <RefreshCw className={cn("size-5 shrink-0", refreshingSession && "animate-spin")} />
             <AnimatePresence>
               {effectivelyOpen && (
