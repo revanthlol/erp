@@ -193,7 +193,12 @@ export default function DashboardLayout() {
               Student Portal
             </div>
             <ModeToggle />
-            <Popover open={showRefreshHint}>
+            <Popover
+              open={showRefreshHint}
+              onOpenChange={(open) => {
+                if (!open) dismissRefreshHint()
+              }}
+            >
               <PopoverAnchor asChild>
                 <Button
                   variant="outline"
@@ -218,34 +223,31 @@ export default function DashboardLayout() {
                   side="bottom"
                   align="center"
                   sideOffset={12}
-                  className="w-80 overflow-visible rounded-2xl border border-white/10 bg-background/90 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/90"
+                  className="w-72 overflow-visible rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900 shadow-lg shadow-black/10"
                   onOpenAutoFocus={(e) => e.preventDefault()}
                   onEscapeKeyDown={dismissRefreshHint}
                 >
                   <div className="relative space-y-3">
-                    <PopoverArrow className="fill-background/90 dark:fill-zinc-950/90" />
+                    <PopoverArrow className="fill-white" />
                     <div className="flex items-start gap-3">
-                      <div className="mt-1 size-2.5 shrink-0 rounded-full bg-primary shadow-[0_0_0_6px_rgba(59,130,246,0.12)]" />
+                      <div className="mt-1 size-2 shrink-0 rounded-full bg-zinc-900" />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground">Refresh Session</p>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        <p className="text-sm font-semibold text-zinc-900">Refresh Session</p>
+                        <p className="mt-1 text-sm leading-relaxed text-zinc-600">
                           Reconnects ERP automatically if session expires.
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center">
                       <Button
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         size="sm"
                         onClick={dismissRefreshHint}
-                        className="h-8 rounded-full px-3 text-xs font-semibold"
+                        className="h-8 rounded-full px-3 text-xs font-semibold text-zinc-900 hover:bg-zinc-100"
                       >
                         Got it
                       </Button>
-                      <span className="text-[11px] leading-none text-muted-foreground">
-                        Visible on desktop and mobile.
-                      </span>
                     </div>
                   </div>
                 </PopoverContent>
