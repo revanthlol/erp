@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { LogOut, Menu, RefreshCw } from "lucide-react"
-import { Popover, PopoverAnchor, PopoverArrow, PopoverContent } from "@/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -193,63 +193,39 @@ export default function DashboardLayout() {
               Student Portal
             </div>
             <ModeToggle />
-            <Popover
-              open={showRefreshHint}
-              onOpenChange={(open) => {
-                if (!open) dismissRefreshHint()
-              }}
-            >
-              <PopoverAnchor asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleHeaderRefreshClick}
-                  disabled={isRefreshingSession}
-                  className={cn(
-                    "relative overflow-visible border-primary/20 text-primary hover:bg-primary/10 transition-all",
-                    showRefreshHint && "ring-1 ring-primary/40 shadow-[0_0_0_8px_rgba(59,130,246,0.12)]",
-                    showRefreshHintPulse && "animate-[pulse_1.8s_ease-in-out_infinite]"
-                  )}
-                  title="Refresh ERP session"
-                >
-                  {showRefreshHint && (
-                    <span className="absolute inset-0 rounded-md bg-primary/10 blur-md" aria-hidden="true" />
-                  )}
-                  <RefreshCw className={`h-4 w-4 relative z-10 ${isRefreshingSession ? "animate-spin" : ""}`} />
-                </Button>
-              </PopoverAnchor>
-              {showRefreshHint && (
-                <PopoverContent
-                  side="bottom"
-                  align="center"
-                  sideOffset={12}
-                  className="w-[250px] overflow-visible rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900 shadow-lg shadow-black/10"
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                  onEscapeKeyDown={dismissRefreshHint}
-                >
-                  <div className="relative space-y-3">
-                    <PopoverArrow className="fill-white" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-zinc-900">Refresh Session</p>
-                      <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-                        Reconnects ERP automatically if session expires.
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <Button
-                        type="button"
-                        variant="default"
-                        size="sm"
-                        onClick={dismissRefreshHint}
-                        className="h-8 rounded-full border border-zinc-900 bg-zinc-900 px-4 text-xs font-semibold text-white shadow-sm hover:bg-zinc-800"
-                      >
-                        Got it
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              )}
-            </Popover>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip open={showRefreshHint ? undefined : false}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleHeaderRefreshClick}
+                    disabled={isRefreshingSession}
+                    className={cn(
+                      "relative overflow-visible border-primary/20 text-primary hover:bg-primary/10 transition-all",
+                      showRefreshHint && "ring-1 ring-primary/40 shadow-[0_0_0_8px_rgba(59,130,246,0.12)]",
+                      showRefreshHintPulse && "animate-[pulse_1.8s_ease-in-out_infinite]"
+                    )}
+                    title="Refresh ERP session"
+                  >
+                    {showRefreshHint && (
+                      <span className="absolute inset-0 rounded-md bg-primary/10 blur-md" aria-hidden="true" />
+                    )}
+                    <RefreshCw className={`h-4 w-4 relative z-10 ${isRefreshingSession ? "animate-spin" : ""}`} />
+                  </Button>
+                </TooltipTrigger>
+                {showRefreshHint && (
+                  <TooltipContent
+                    side="bottom"
+                    align="center"
+                    sideOffset={10}
+                    className="max-w-[220px] rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 shadow-lg shadow-black/10"
+                  >
+                    Reconnects ERP automatically if session expires.
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             <Button
               variant="ghost"
               size="icon"
