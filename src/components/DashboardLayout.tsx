@@ -223,28 +223,25 @@ export default function DashboardLayout() {
                   side="bottom"
                   align="center"
                   sideOffset={12}
-                  className="w-72 overflow-visible rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900 shadow-lg shadow-black/10"
+                  className="w-[250px] overflow-visible rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900 shadow-lg shadow-black/10"
                   onOpenAutoFocus={(e) => e.preventDefault()}
                   onEscapeKeyDown={dismissRefreshHint}
                 >
                   <div className="relative space-y-3">
                     <PopoverArrow className="fill-white" />
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 size-2 shrink-0 rounded-full bg-zinc-900" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-zinc-900">Refresh Session</p>
-                        <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-                          Reconnects ERP automatically if session expires.
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-zinc-900">Refresh Session</p>
+                      <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+                        Reconnects ERP automatically if session expires.
+                      </p>
                     </div>
                     <div className="flex items-center">
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="default"
                         size="sm"
                         onClick={dismissRefreshHint}
-                        className="h-8 rounded-full px-3 text-xs font-semibold text-zinc-900 hover:bg-zinc-100"
+                        className="h-8 rounded-full border border-zinc-900 bg-zinc-900 px-4 text-xs font-semibold text-white shadow-sm hover:bg-zinc-800"
                       >
                         Got it
                       </Button>
