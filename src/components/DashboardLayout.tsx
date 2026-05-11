@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { LogOut, Menu, RefreshCw } from "lucide-react"
+import { Popover, PopoverAnchor, PopoverArrow, PopoverContent } from "@/components/ui/popover"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,6 +33,7 @@ export default function DashboardLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isRefreshingSession, setIsRefreshingSession] = useState(false)
   const [showRefreshHint, setShowRefreshHint] = useState(false)
+  const [showRefreshHintPulse, setShowRefreshHintPulse] = useState(false)
   
   const pillTouchStartX = useRef(0)
 
@@ -64,9 +66,20 @@ export default function DashboardLayout() {
     const shouldShowHint = sessionStorage.getItem("erp-refresh-session-tip") === "1"
     if (shouldShowHint) {
       setShowRefreshHint(true)
+      setShowRefreshHintPulse(true)
       sessionStorage.removeItem("erp-refresh-session-tip")
     }
   }, [])
+
+  useEffect(() => {
+    if (!showRefreshHint) return
+
+    const timerId = window.setTimeout(() => {
+      setShowRefreshHintPulse(false)
+    }, 3600)
+
+    return () => window.clearTimeout(timerId)
+  }, [showRefreshHint])
 
   const getPageName = () => {
     const path = location.pathname
@@ -103,6 +116,16 @@ export default function DashboardLayout() {
     }
   }
 
+  const dismissRefreshHint = () => {
+    setShowRefreshHint(false)
+    setShowRefreshHintPulse(false)
+  }
+
+  const handleHeaderRefreshClick = async () => {
+    dismissRefreshHint()
+    await handleRefreshSession()
+  }
+
   // Calculate left padding for desktop
   // If pinned: 16rem (256px)
   // If not pinned: 4rem (64px)
@@ -111,14 +134,12 @@ export default function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
-        {!isMobile && (
+      {!isMobile && (
         <SessionNavBar 
           isPinned={isPinned} 
           onHoverChange={setIsSidebarHovered}
           onRefreshSession={handleRefreshSession}
           refreshingSession={isRefreshingSession}
-          showRefreshHint={showRefreshHint}
-          onDismissRefreshHint={() => setShowRefreshHint(false)}
         />
       )}
 
@@ -130,8 +151,6 @@ export default function DashboardLayout() {
             className="relative w-64 border-none shadow-none"
             onRefreshSession={handleRefreshSession}
             refreshingSession={isRefreshingSession}
-            showRefreshHint={showRefreshHint}
-            onDismissRefreshHint={() => setShowRefreshHint(false)}
           />
         </SheetContent>
       </Sheet>
@@ -174,16 +193,64 @@ export default function DashboardLayout() {
               Student Portal
             </div>
             <ModeToggle />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRefreshSession}
-              disabled={isRefreshingSession}
-              className="border-primary/20 text-primary hover:bg-primary/10"
-              title="Refresh ERP session"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshingSession ? "animate-spin" : ""}`} />
-            </Button>
+            <Popover open={showRefreshHint}>
+              <PopoverAnchor asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleHeaderRefreshClick}
+                  disabled={isRefreshingSession}
+                  className={cn(
+                    "relative overflow-visible border-primary/20 text-primary hover:bg-primary/10 transition-all",
+                    showRefreshHint && "ring-1 ring-primary/40 shadow-[0_0_0_8px_rgba(59,130,246,0.12)]",
+                    showRefreshHintPulse && "animate-[pulse_1.8s_ease-in-out_infinite]"
+                  )}
+                  title="Refresh ERP session"
+                >
+                  {showRefreshHint && (
+                    <span className="absolute inset-0 rounded-md bg-primary/10 blur-md" aria-hidden="true" />
+                  )}
+                  <RefreshCw className={`h-4 w-4 relative z-10 ${isRefreshingSession ? "animate-spin" : ""}`} />
+                </Button>
+              </PopoverAnchor>
+              {showRefreshHint && (
+                <PopoverContent
+                  side="bottom"
+                  align="center"
+                  sideOffset={12}
+                  className="w-80 overflow-visible rounded-2xl border border-white/10 bg-background/90 p-4 shadow-2xl shadow-black/20 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/90"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onEscapeKeyDown={dismissRefreshHint}
+                >
+                  <div className="relative space-y-3">
+                    <PopoverArrow className="fill-background/90 dark:fill-zinc-950/90" />
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 size-2.5 shrink-0 rounded-full bg-primary shadow-[0_0_0_6px_rgba(59,130,246,0.12)]" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">Refresh Session</p>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                          Reconnects ERP automatically if session expires.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={dismissRefreshHint}
+                        className="h-8 rounded-full px-3 text-xs font-semibold"
+                      >
+                        Got it
+                      </Button>
+                      <span className="text-[11px] leading-none text-muted-foreground">
+                        Visible on desktop and mobile.
+                      </span>
+                    </div>
+                  </div>
+                </PopoverContent>
+              )}
+            </Popover>
             <Button
               variant="ghost"
               size="icon"
