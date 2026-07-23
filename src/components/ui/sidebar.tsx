@@ -157,7 +157,11 @@ export function SessionNavBar({
     >
       <div className="relative flex h-full flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex h-16 w-full shrink-0 items-center border-b px-4">
+        <Link
+          to="/"
+          aria-label="Go to student profile"
+          className="flex h-16 w-full shrink-0 items-center border-b px-4 hover:bg-accent/50 transition-colors"
+        >
           <div className="flex items-center gap-3 w-full">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground overflow-hidden">
               <Avatar className="size-8">
@@ -180,7 +184,7 @@ export function SessionNavBar({
               )}
             </AnimatePresence>
           </div>
-        </div>
+        </Link>
 
         {/* Main Menu */}
         <ScrollArea className="flex-1 px-3 py-4">

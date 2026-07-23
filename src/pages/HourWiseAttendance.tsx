@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, HelpCircle, AlertCircle, Info, RefreshCw } from "lucide-react";
+import { CalendarDays, HelpCircle, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authApi } from "@/lib/api";
 
@@ -83,12 +83,19 @@ export default function HourWiseAttendance() {
     // Logic Vars
     const present = stats?.presentHours || 0;
     const absent = stats?.absentHours || 0;
-    const pct = stats?.percentage ? parseFloat(stats.percentage.toFixed(2)) : 0;
+    const od = stats?.od || 0;
+
+    // The ERP's overall absent count includes OD hours. OD is treated as
+    // attended for the efficiency rate, so move it from missed to attended.
+    const chartPresent = present + od;
+    const chartAbsent = Math.max(absent - od, 0);
+    const chartTotal = chartPresent + chartAbsent;
+    const pct = chartTotal > 0 ? parseFloat(((chartPresent / chartTotal) * 100).toFixed(2)) : 0;
     
     // -- CHART CONFIG --
     const chartData = [
-        { status: "present", hours: present, fill: "var(--color-present)" },
-        { status: "absent", hours: absent, fill: "var(--color-absent)" },
+        { status: "present", hours: chartPresent, fill: "var(--color-present)" },
+        { status: "absent", hours: chartAbsent, fill: "var(--color-absent)" },
     ];
 
     const chartConfig = {
