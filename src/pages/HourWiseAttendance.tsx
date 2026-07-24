@@ -91,11 +91,15 @@ export default function HourWiseAttendance() {
     const chartAbsent = Math.max(absent - od, 0);
     const chartTotal = chartPresent + chartAbsent;
     const pct = chartTotal > 0 ? parseFloat(((chartPresent / chartTotal) * 100).toFixed(2)) : 0;
+    const presentPct = chartTotal > 0 ? parseFloat(((present / chartTotal) * 100).toFixed(2)) : 0;
+    const odPct = chartTotal > 0 ? parseFloat(((od / chartTotal) * 100).toFixed(2)) : 0;
+    const absentPct = chartTotal > 0 ? parseFloat(((chartAbsent / chartTotal) * 100).toFixed(2)) : 0;
     
     // -- CHART CONFIG --
     const chartData = [
-        { status: "present", hours: chartPresent, fill: "var(--color-present)" },
-        { status: "absent", hours: chartAbsent, fill: "var(--color-absent)" },
+        { status: "present", label: "Present", hours: present, percentage: presentPct, fill: "var(--color-present)" },
+        { status: "od", label: "OD", hours: od, percentage: odPct, fill: "var(--color-od)" },
+        { status: "absent", label: "Absent", hours: chartAbsent, percentage: absentPct, fill: "var(--color-absent)" },
     ];
 
     const chartConfig = {
@@ -103,6 +107,10 @@ export default function HourWiseAttendance() {
       present: {
         label: "Present",
         color: "hsl(142, 76%, 36%)", 
+      },
+      od: {
+        label: "OD",
+        color: "hsl(217, 91%, 60%)",
       },
       absent: {
         label: "Absent",
@@ -313,7 +321,20 @@ export default function HourWiseAttendance() {
                               <PieChart>
                                 <ChartTooltip
                                   cursor={false}
-                                  content={<ChartTooltipContent hideLabel className="bg-card text-foreground border-2" />}
+                                  content={
+                                    <ChartTooltipContent
+                                      hideLabel
+                                      className="bg-card text-foreground border-2"
+                                      formatter={(value, name, item) => (
+                                        <>
+                                          <span className="font-medium">{name}</span>
+                                          <span className="font-mono font-medium tabular-nums">
+                                            {value} hrs ({item.payload.percentage}%)
+                                          </span>
+                                        </>
+                                      )}
+                                    />
+                                  }
                                 />
                                 <Pie
                                   data={chartData}
@@ -344,10 +365,11 @@ export default function HourWiseAttendance() {
                             </ChartContainer>
                         </CardContent>
                         
-                        <CardFooter className="flex-col gap-2 pb-6 text-sm">
-                            <div className="w-full flex justify-center gap-6">
-                                <LegendDot label="Present" color="bg-green-600" />
-                                <LegendDot label="Absent" color="bg-red-500" />
+                        <CardFooter className="flex-col gap-3 pb-6 text-sm">
+                            <div className="w-full grid grid-cols-3 gap-2 border-t pt-4">
+                                <LegendStat label="Present" value={present} percentage={presentPct} color="bg-green-600" />
+                                <LegendStat label="OD" value={od} percentage={odPct} color="bg-blue-500" />
+                                <LegendStat label="Absent" value={chartAbsent} percentage={absentPct} color="bg-red-500" />
                             </div>
                         </CardFooter>
                     </Card>
@@ -368,10 +390,13 @@ const LegendItem = ({ label, desc, colorClass }: { label: string, desc: string, 
     </div>
 );
 
-const LegendDot = ({ label, color }: {label:string, color:string}) => (
-    <div className="flex items-center gap-2">
-        <span className={cn("h-2.5 w-2.5 rounded-full ring-2 ring-transparent shadow-sm", color)} />
-        <span className="text-xs font-medium opacity-80">{label}</span>
+const LegendStat = ({ label, value, percentage, color }: { label: string, value: number, percentage: number, color: string }) => (
+    <div className="flex min-w-0 items-start gap-2">
+        <span className={cn("mt-1 h-8 w-1 shrink-0 rounded-full shadow-sm", color)} />
+        <div className="min-w-0">
+            <p className="truncate text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+            <p className="text-xs font-semibold tabular-nums">{value} hrs <span className="text-muted-foreground">· {percentage}%</span></p>
+        </div>
     </div>
 );
 

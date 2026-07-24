@@ -63,7 +63,7 @@ export default function StudentProfile() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in-50 duration-500">
       
       {/* Main Details Card */}
-      <Card className="md:col-span-2 shadow-sm relative">
+      <Card data-profile-details className="order-2 md:order-1 md:col-span-2 shadow-sm relative">
         <CardHeader className="bg-muted/30 pb-4 flex flex-row items-start justify-between">
           <div>
               <CardTitle className="text-xl font-bold tracking-tight text-primary">General Information</CardTitle>
@@ -106,7 +106,7 @@ export default function StudentProfile() {
       </Card>
 
       {/* Profile Photo & Status Card */}
-      <div className="space-y-6">
+      <div data-profile-photo className="order-1 md:order-2 space-y-6">
         <Card className="shadow-sm overflow-hidden border-2 border-primary/5">
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex justify-center items-center relative">
                  <Avatar className="w-48 h-48 border-4 border-white shadow-xl">

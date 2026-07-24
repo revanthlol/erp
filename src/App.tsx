@@ -15,7 +15,7 @@ import Attendance from "@/pages/Attendance";
 import HourWiseAttendance from "@/pages/HourWiseAttendance";
 import InternalMarks from "@/pages/InternalMarks";
 import ExamMarks from "@/pages/ExamMarks";
-import HallTicket from "@/pages/HallTicket";
+import OfficialERPNotice from "@/pages/OfficialERPNotice";
 import Services from "@/pages/Services";
 import Fees from "@/pages/Fees";
 import Library from "@/pages/Library";
@@ -44,7 +44,7 @@ function AnimatedRoutes() {
                 <Route path="attendance" element={<PageTransition><Attendance /></PageTransition>} />
                 <Route path="attendance-hourly" element={<PageTransition><HourWiseAttendance /></PageTransition>} />
                 <Route path="internals" element={<PageTransition><InternalMarks /></PageTransition>} />
-                <Route path="hall-ticket" element={<PageTransition><HallTicket /></PageTransition>} />
+                <Route path="official-erp" element={<PageTransition><OfficialERPNotice /></PageTransition>} />
                 <Route path="exam-marks" element={<PageTransition><ExamMarks /></PageTransition>} />
                 <Route path="services" element={<PageTransition><Services /></PageTransition>} />
                 <Route path="fees" element={<PageTransition><Fees /></PageTransition>} />
