@@ -44,7 +44,8 @@ function AnimatedRoutes() {
                 <Route path="attendance" element={<PageTransition><Attendance /></PageTransition>} />
                 <Route path="attendance-hourly" element={<PageTransition><HourWiseAttendance /></PageTransition>} />
                 <Route path="internals" element={<PageTransition><InternalMarks /></PageTransition>} />
-                <Route path="official-erp" element={<PageTransition><OfficialERPNotice /></PageTransition>} />
+                <Route path="hall-ticket" element={<PageTransition><OfficialERPNotice /></PageTransition>} />
+                <Route path="official-erp" element={<Navigate to="/hall-ticket" replace />} />
                 <Route path="exam-marks" element={<PageTransition><ExamMarks /></PageTransition>} />
                 <Route path="services" element={<PageTransition><Services /></PageTransition>} />
                 <Route path="fees" element={<PageTransition><Fees /></PageTransition>} />

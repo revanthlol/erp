@@ -84,6 +84,8 @@ export interface HourlyStats {
     od: number;
     ml: number;
     cl: number;
+    da: number;
+    la: number;
 }
 
 export interface HourlyAttendanceResponse {

@@ -387,7 +387,9 @@ class ERPClient {
                 percentage: getHiddenVal('hdnPresentPercentage'),
                 od: getHiddenVal('hdnOD'),
                 ml: getHiddenVal('hdnML'),
-                cl: getHiddenVal('hdnCL')
+                cl: getHiddenVal('hdnCL'),
+                da: getHiddenVal('hdnDA'),
+                la: getHiddenVal('hdnLA')
             };
             // 2. Extract Daily Logs
             const logs = [];

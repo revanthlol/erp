@@ -53,6 +53,8 @@ interface HourlyStats {
     od: number;
     ml: number;
     cl: number;
+    da: number;
+    la: number;
 }
 
 export default function HourWiseAttendance() {
@@ -84,22 +86,33 @@ export default function HourWiseAttendance() {
     const present = stats?.presentHours || 0;
     const absent = stats?.absentHours || 0;
     const od = stats?.od || 0;
+    const ml = stats?.ml || 0;
+    const cl = stats?.cl || 0;
+    const da = stats?.da || 0;
+    const la = stats?.la || 0;
 
-    // The ERP's overall absent count includes OD hours. OD is treated as
-    // attended for the efficiency rate, so move it from missed to attended.
-    const chartPresent = present + od;
-    const chartAbsent = Math.max(absent - od, 0);
-    const chartTotal = chartPresent + chartAbsent;
-    const pct = chartTotal > 0 ? parseFloat(((chartPresent / chartTotal) * 100).toFixed(2)) : 0;
+    // The ERP's overall absent count includes each leave/status category.
+    // Keep every category as its own slice while counting OD as attended.
+    const chartAbsent = Math.max(absent - od - ml - cl - da - la, 0);
+    const chartTotal = present + chartAbsent + od + ml + cl + da + la;
+    const pct = chartTotal > 0 ? parseFloat((((present + od) / chartTotal) * 100).toFixed(2)) : 0;
     const presentPct = chartTotal > 0 ? parseFloat(((present / chartTotal) * 100).toFixed(2)) : 0;
     const odPct = chartTotal > 0 ? parseFloat(((od / chartTotal) * 100).toFixed(2)) : 0;
     const absentPct = chartTotal > 0 ? parseFloat(((chartAbsent / chartTotal) * 100).toFixed(2)) : 0;
+    const clPct = chartTotal > 0 ? parseFloat(((cl / chartTotal) * 100).toFixed(2)) : 0;
+    const mlPct = chartTotal > 0 ? parseFloat(((ml / chartTotal) * 100).toFixed(2)) : 0;
+    const daPct = chartTotal > 0 ? parseFloat(((da / chartTotal) * 100).toFixed(2)) : 0;
+    const laPct = chartTotal > 0 ? parseFloat(((la / chartTotal) * 100).toFixed(2)) : 0;
     
     // -- CHART CONFIG --
     const chartData = [
         { status: "present", label: "Present", hours: present, percentage: presentPct, fill: "var(--color-present)" },
-        { status: "od", label: "OD", hours: od, percentage: odPct, fill: "var(--color-od)" },
         { status: "absent", label: "Absent", hours: chartAbsent, percentage: absentPct, fill: "var(--color-absent)" },
+        { status: "cl", label: "CL", hours: cl, percentage: clPct, fill: "var(--color-cl)" },
+        { status: "ml", label: "ML", hours: ml, percentage: mlPct, fill: "var(--color-ml)" },
+        { status: "od", label: "OD", hours: od, percentage: odPct, fill: "var(--color-od)" },
+        { status: "da", label: "DA", hours: da, percentage: daPct, fill: "var(--color-da)" },
+        { status: "la", label: "LA", hours: la, percentage: laPct, fill: "var(--color-la)" },
     ];
 
     const chartConfig = {
@@ -111,6 +124,22 @@ export default function HourWiseAttendance() {
       od: {
         label: "OD",
         color: "hsl(217, 91%, 60%)",
+      },
+      cl: {
+        label: "CL",
+        color: "hsl(280, 67%, 60%)",
+      },
+      ml: {
+        label: "ML",
+        color: "hsl(38, 92%, 50%)",
+      },
+      da: {
+        label: "DA",
+        color: "hsl(24, 95%, 53%)",
+      },
+      la: {
+        label: "LA",
+        color: "hsl(330, 65%, 55%)",
       },
       absent: {
         label: "Absent",
@@ -294,7 +323,9 @@ export default function HourWiseAttendance() {
                                 {[
                                     { k: 'OD', v: stats?.od, c: 'text-blue-600 bg-blue-50 border-blue-200' },
                                     { k: 'ML', v: stats?.ml, c: 'text-amber-600 bg-amber-50 border-amber-200' },
-                                    { k: 'CL', v: stats?.cl, c: 'text-purple-600 bg-purple-50 border-purple-200' }
+                                    { k: 'CL', v: stats?.cl, c: 'text-purple-600 bg-purple-50 border-purple-200' },
+                                    { k: 'DA', v: stats?.da, c: 'text-orange-600 bg-orange-50 border-orange-200' },
+                                    { k: 'LA', v: stats?.la, c: 'text-pink-600 bg-pink-50 border-pink-200' }
                                 ].map((item) => (
                                     item.v ? (
                                         <div key={item.k} className={cn("px-2 py-1 rounded text-xs border font-medium flex items-center gap-1", item.c)}>
@@ -303,13 +334,13 @@ export default function HourWiseAttendance() {
                                         </div>
                                     ) : null
                                 ))}
-                                {(!stats?.od && !stats?.ml && !stats?.cl) && <span className="text-xs text-muted-foreground italic">None recorded</span>}
+                                {(!stats?.od && !stats?.ml && !stats?.cl && !stats?.da && !stats?.la) && <span className="text-xs text-muted-foreground italic">None recorded</span>}
                              </div>
                         </CardContent>
                     </Card>
 
                     {/* THE DONUT CHART */}
-                    <Card className="flex-1 flex flex-col shadow-sm min-h-0 h-[320px] lg:h-auto border-t-4 border-t-primary/20">
+                    <Card className="flex-1 flex flex-col shadow-sm min-h-0 min-h-[460px] lg:h-auto border-t-4 border-t-primary/20">
                         <CardHeader className="items-center pb-0 pt-4">
                             <CardTitle className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Efficiency Rate</CardTitle>
                         </CardHeader>
@@ -337,7 +368,7 @@ export default function HourWiseAttendance() {
                                   }
                                 />
                                 <Pie
-                                  data={chartData}
+                                  data={chartData.filter((item) => item.hours > 0)}
                                   dataKey="hours"
                                   nameKey="status"
                                   innerRadius={65}
@@ -366,10 +397,14 @@ export default function HourWiseAttendance() {
                         </CardContent>
                         
                         <CardFooter className="flex-col gap-3 pb-6 text-sm">
-                            <div className="w-full grid grid-cols-3 gap-2 border-t pt-4">
+                            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-3 border-t pt-4">
                                 <LegendStat label="Present" value={present} percentage={presentPct} color="bg-green-600" />
-                                <LegendStat label="OD" value={od} percentage={odPct} color="bg-blue-500" />
                                 <LegendStat label="Absent" value={chartAbsent} percentage={absentPct} color="bg-red-500" />
+                                <LegendStat label="CL" value={cl} percentage={clPct} color="bg-purple-500" />
+                                <LegendStat label="ML" value={ml} percentage={mlPct} color="bg-amber-500" />
+                                <LegendStat label="OD" value={od} percentage={odPct} color="bg-blue-500" />
+                                <LegendStat label="DA" value={da} percentage={daPct} color="bg-orange-500" />
+                                <LegendStat label="LA" value={la} percentage={laPct} color="bg-pink-500" />
                             </div>
                         </CardFooter>
                     </Card>
