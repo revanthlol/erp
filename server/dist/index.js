@@ -18,13 +18,33 @@ const allowedOrigins = [
     .map((origin) => origin.trim())
     .filter((origin, index, list) => list.indexOf(origin) === index)
     .filter(Boolean);
+const isOriginAllowed = (origin) => {
+    if (!origin)
+        return true;
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin))
+        return true;
+    // Localhost on any port
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
+        return true;
+    // Server IP on any port
+    if (/^http:\/\/(140\.245\.218\.2)(:\d+)?$/.test(origin))
+        return true;
+    // Any Vercel deployment (preview or production)
+    if (/^https:\/\/([a-z0-9-_]+\.)*vercel\.app$/.test(origin))
+        return true;
+    // DuckDNS domain
+    if (/^https:\/\/ocus\.duckdns\.org(:\d+)?$/.test(origin))
+        return true;
+    return false;
+};
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        if (isOriginAllowed(origin)) {
             callback(null, true);
-            return;
         }
-        callback(new Error(`CORS blocked for origin: ${origin}`));
+        else {
+            callback(null, false);
+        }
     },
     credentials: true
 }));
